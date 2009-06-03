@@ -135,6 +135,7 @@ NANO_BOOTLOADER="boot/boot0sio"
 # Not a variable at this time
 
 NANO_ARCH=i386
+NANO_FREEBSD_VERSION=7
 
 #######################################################################
 #
@@ -560,6 +561,59 @@ cust_pkg () (
 	rm -rf ${NANO_WORLDDIR}/Pkg
 )
 
+clean_ports() {
+	echo "## Clean and create ports directory (${NANO_PORTSDIR})"
+	if rm -rf ${NANO_PORTSDIR}/ > /dev/null 2>&1 ; then
+		true
+	else
+		chflags -R noschg ${NANO_PORTSDIR}/
+		rm -rf ${NANO_PORTSDIR}/
+	fi
+	mkdir -p ${NANO_PORTSDIR}/
+}
+
+install_ports() {
+	echo "## building ports to (${NANO_PORTSDIR})"
+	for PORT in $NANO_PORTS; do
+	        echo "Finding $PORT..."
+		DOESPORTEXIST=`whereis -sq $PORT`
+	        #DOESPORTEXIST=`find /usr/ports -name $PORT -type d | grep -v pfPorts | head -n 1`
+	        if [ "${DOESPORTEXIST}x" != "x" ]; then
+	                ( cd $DOESPORTEXIST && make clean )
+	        else 
+			echo "Port not found"
+	                #( cd /home/pfsense/tools/pfPorts/$PORT && make clean)
+	        fi
+	done
+
+	for PORT in $NANO_PORTS; do
+	        echo ">>>> Building $PORT..."
+		DOESPORTEXIST=`whereis -sq $PORT`
+	        #DOESPORTEXIST=`find /usr/ports -name $PORT -type d | grep -v pfPorts | head -n 1`
+	        if [ "${DOESPORTEXIST}x" != "x" ]; then
+	                echo "Found port.  Copying and building..."
+	                #if [ -f /home/pfsense/tools/pfPorts/$PORT/useports ]; then
+	                #        echo "Found /home/pfsense/tools/pfPorts/useports ... Not removing target port directory."
+	                #else
+	                #        echo "Removing ${DOESPORTEXIST}..."
+	                #        rm -rf $DOESPORTEXIST
+	                #        mkdir -p $DOESPORTEXIST
+	                #fi
+	                #rm -rf /home/pfsense/tools/pfPorts/$PORT/work 2>/dev/null
+	                #cp -R /home/pfsense/tools/pfPorts/$PORT $DOESPORTEXIST/../
+	                ( cd $DOESPORTEXIST && make TARGET_ARCH=${NANO_ARCH} -DBATCH -DFORCE_PKG_REGISTER -DNOPORTDOCS clean )
+	                ( cd $DOESPORTEXIST && make TARGET_ARCH=${NANO_ARCH} -DBATCH -DFORCE_PKG_REGISTER -DNOPORTDOCS )
+	                ( cd $DOESPORTEXIST && make TARGET_ARCH=${NANO_ARCH} -DBATCH -DFORCE_PKG_REGISTER -DNOPORTDOCS install package-recursive )
+	        else
+	                echo "Port not found, building from pfPorts..."
+	                #( cd $DOESPORTEXIST && make TARGET_ARCH=${ARCH} $MAKEJ_PORTS -DBATCH -DFORCE_PKG_REGISTER -DNOPORTDOCS clean )
+	                #( cd /home/pfsense/tools/pfPorts/$PORT && make TARGET_ARCH=${ARCH} -DBATCH -DFORCE_PKG_REGISTER -DNOPORTDOCS )
+	                #( cd /home/pfsense/tools/pfPorts/$PORT && make TARGET_ARCH=${ARCH} -DBATCH -DFORCE_PKG_REGISTER -DNOPORTDOCS install )
+	        fi
+	done
+	cust_pkg
+}
+
 #######################################################################
 # Convenience function:
 # 	Register $1 as customize function.
@@ -646,6 +700,14 @@ else
 	MAKEOBJDIRPREFIX=${NANO_OBJ}
 fi
 
+if [ "x${NANO_PORTSDIR}" = "x" ] ; then
+	PACKAGES=MAKEOBJDIRPREFIX/Ports
+	NANO_PORTSDIR=${PACKAGES}
+else
+	PACKAGES=${NANO_PORTSDIR}
+fi
+
+NANO_PACKAGE_DIR=${PACKAGES}/All
 NANO_WORLDDIR=${MAKEOBJDIRPREFIX}/_.w
 NANO_MAKE_CONF=${MAKEOBJDIRPREFIX}/make.conf
 
@@ -659,8 +721,10 @@ else
 fi
 
 export MAKEOBJDIRPREFIX
+export PACKAGES
 
 export NANO_ARCH
+export NANO_FREEBSD_VERSION
 export NANO_CODESIZE
 export NANO_CONFSIZE
 export NANO_CUSTOMIZE
@@ -673,6 +737,8 @@ export NANO_MEDIASIZE
 export NANO_NAME
 export NANO_NEWFS
 export NANO_OBJ
+export NANO_PORTSDIR
+export NANO_PORTS
 export NANO_PMAKE
 export NANO_SECTS
 export NANO_SRC
