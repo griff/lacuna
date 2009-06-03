@@ -145,7 +145,7 @@ NANO_FREEBSD_VERSION=7
 #######################################################################
 
 clean_build ( ) (
-	echo "## Clean and create object directory (${MAKEOBJDIRPREFIX})"
+	echo "## Clean object directory (${MAKEOBJDIRPREFIX})"
 
 	if rm -rf ${MAKEOBJDIRPREFIX} > /dev/null 2>&1 ; then
 		true
@@ -153,6 +153,10 @@ clean_build ( ) (
 		chflags -R noschg ${MAKEOBJDIRPREFIX}
 		rm -rf ${MAKEOBJDIRPREFIX}
 	fi
+)
+
+create_builddir ( ) (
+	echo "## Create object directory (${MAKEOBJDIRPREFIX})"
 	mkdir -p ${MAKEOBJDIRPREFIX}
 	printenv > ${MAKEOBJDIRPREFIX}/_.env
 )
@@ -195,13 +199,17 @@ build_kernel ( ) (
 )
 
 clean_world ( ) (
-	echo "## Clean and create world directory (${NANO_WORLDDIR})"
+	echo "## Clean world directory (${NANO_WORLDDIR})"
 	if rm -rf ${NANO_WORLDDIR}/ > /dev/null 2>&1 ; then
 		true
 	else
 		chflags -R noschg ${NANO_WORLDDIR}/
 		rm -rf ${NANO_WORLDDIR}/
 	fi
+)
+
+create_worlddir ( ) (
+	echo "## Create world directory (${NANO_WORLDDIR})"
 	mkdir -p ${NANO_WORLDDIR}/
 )
 
@@ -514,7 +522,7 @@ cust_allow_ssh_root () (
 # Install the stuff under ./Files
 
 cust_install_files () (
-	cd ${NANO_TOOLS}/Files
+	cd ${PKGDIR}/Files
 	find . -print | grep -v /CVS | cpio -dumpv ${NANO_WORLDDIR}
 )
 
@@ -701,7 +709,7 @@ else
 fi
 
 if [ "x${NANO_PORTSDIR}" = "x" ] ; then
-	PACKAGES=MAKEOBJDIRPREFIX/Ports
+	PACKAGES=${MAKEOBJDIRPREFIX}/Ports
 	NANO_PORTSDIR=${PACKAGES}
 else
 	PACKAGES=${NANO_PORTSDIR}
@@ -750,9 +758,13 @@ export NANO_BOOTLOADER
 #######################################################################
 # And then it is as simple as that...
 
+clean_build
+create_builddir
+clean_world
+
+make_conf_build
+
 if $do_world ; then
-	clean_build
-	make_conf_build
 	build_world
 else
 	echo "## Skipping buildworld (as instructed)"
@@ -764,7 +776,7 @@ else
 	echo "## Skipping buildkernel (as instructed)"
 fi
 
-clean_world
+create_worlddir
 make_conf_install
 install_world
 install_etc
