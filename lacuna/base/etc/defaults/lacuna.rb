@@ -1,4 +1,4 @@
-BSD::Config.defaults do |c|
+Lacuna::Config.defaults do |c|
   c.paths do |p|
     p[:prefix] = '/'
     p[:etc] = p[:prefix] / 'etc'

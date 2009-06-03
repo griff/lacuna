@@ -1,4 +1,4 @@
-module BSD
+module Lacuna
   module Network
     class << self
       def interfaces(flush=false)
