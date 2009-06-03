@@ -761,6 +761,7 @@ export NANO_BOOTLOADER
 clean_build
 create_builddir
 clean_world
+create_worlddir
 
 make_conf_build
 
@@ -776,7 +777,6 @@ else
 	echo "## Skipping buildkernel (as instructed)"
 fi
 
-create_worlddir
 make_conf_install
 install_world
 install_etc
