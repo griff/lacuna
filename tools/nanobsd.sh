@@ -60,10 +60,10 @@ NANO_NAME=full
 NANO_SRC=/usr/src
 
 # Where nanobsd additional files live under the source tree
-NANO_TOOLS=tools/tools/nanobsd
+NANO_TOOLS=$PRGDIR
 
 # Where cust_pkg() finds packages to install
-NANO_PACKAGE_DIR=${NANO_SRC}/${NANO_TOOLS}/Pkg
+NANO_PACKAGE_DIR=${NANO_TOOLS}/Pkg
 
 # Object tree directory
 # default is subdir of /usr/obj
@@ -522,7 +522,7 @@ cust_allow_ssh_root () (
 # Install the stuff under ./Files
 
 cust_install_files () (
-	cd ${PKGDIR}/Files
+	cd ${NANO_TOOLS}/Files
 	find . -print | grep -v /CVS | cpio -dumpv ${NANO_WORLDDIR}
 )
 

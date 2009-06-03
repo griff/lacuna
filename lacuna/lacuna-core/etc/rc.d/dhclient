@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+
+# PROVIDE: dhclient
+# KEYWORD: nojail nostart

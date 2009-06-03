@@ -6,9 +6,9 @@
 
 def start(*devices)
   if devices.size == 0
-    BSD::Network.vlans
+    Lacuna::Network.vlans
   end
-  interfaces = BSD::Network.configured_interfaces
+  interfaces = Lacuna::Network.configured_interfaces
   interfaces.select! {|d| devices.any?{|d2| d.device==d2 } } if devices.size > 0
   interfaces.each {|i| i.start}
 end
@@ -20,7 +20,10 @@ def stop(*devices)
 #  interfaces.each {|i| i.stop}
 end
 
-cmd = ARGV.shift || 'start'
-puts respond_to?(:start)
-
-send(cmd, *ARGV) if respond_to?(cmd.to_sym)
+require 'rubygems'
+require 'lacuna-core'
+def respond_to_any?(o)
+  private_methods.include?(o.to_s) || public_methods.include?(o.to_s) || protected_methods.include?(o.to_s)
+end
+cmd = ARGV.shift || 'status'
+send(cmd, *ARGV) if respond_to_any?(cmd.to_sym)
