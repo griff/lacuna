@@ -1,0 +1,14 @@
+NETWORK:
+atm1?
+hostname
+ipfilter
+ipnat
+ipfs
+sppp?
+auto_linklocal
+netif
+ip6addrctl
+pccard_ether
+
+GENERAL:
+sysctl
