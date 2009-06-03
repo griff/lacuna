@@ -170,7 +170,7 @@ build_world ( ) (
 
 	cd ${NANO_SRC}
 	${NANO_PMAKE} __MAKE_CONF=${NANO_MAKE_CONF} buildworld \
-		 TARGET_ARCH=Â$NANO_ARCH \
+		 TARGET_ARCH=$NANO_ARCH \
 		> ${MAKEOBJDIRPREFIX}/_.bw 2>&1
 )
 
