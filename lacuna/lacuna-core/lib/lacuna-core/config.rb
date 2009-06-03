@@ -1,4 +1,4 @@
-module BSD
+module Lacuna
   class Config
     def self.defaults
     end
