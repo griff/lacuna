@@ -21,9 +21,9 @@ if defined?(Merb::Plugins)
   module Lacuna::BaseUi
     
     # Slice metadata
-    self.description = "Lacuna BaseUi is a chunky Merb slice!"
+    self.description = "Lacuna Base UI is a chunky Merb slice!"
     self.version = "0.0.1"
-    self.author = "Engine Yard"
+    self.author = "Brian Olsen"
     
     # Stub classes loaded hook - runs before LoadClasses BootLoader
     # right after a slice's classes have been loaded internally.
@@ -38,7 +38,7 @@ if defined?(Merb::Plugins)
     def self.activate
     end
     
-    # Deactivation hook - triggered by Merb::Slices.deactivate(LacunaBaseUi)
+    # Deactivation hook - triggered by Merb::Slices.deactivate(Lacuna::BaseUi)
     def self.deactivate
     end
     
@@ -62,16 +62,16 @@ if defined?(Merb::Plugins)
     
   end
   
-  # Setup the slice layout for LacunaBaseUi
+  # Setup the slice layout for Lacuna::BaseUi
   #
-  # Use Lacuna::BaseUi.push_path and LacunaBaseUi.push_app_path
+  # Use Lacuna::BaseUi.push_path and Lacuna::BaseUi.push_app_path
   # to set paths to lacuna-base-ui-level and app-level paths. Example:
   #
-  # Lacuna::BaseUi.push_path(:application, LacunaBaseUi.root)
+  # Lacuna::BaseUi.push_path(:application, Lacuna::BaseUi.root)
   # Lacuna::BaseUi.push_app_path(:application, Merb.root / 'slices' / 'lacuna-base-ui')
   # ...
   #
-  # Any component path that hasn't been set will default to LacunaBaseUi.root
+  # Any component path that hasn't been set will default to Lacuna::BaseUi.root
   #
   # Or just call setup_default_structure! to setup a basic Merb MVC structure.
   Lacuna::BaseUi.setup_default_structure!

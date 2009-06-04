@@ -110,7 +110,7 @@ NANO_CODESIZE=0
 
 # Size of configuration file system in 512 bytes sectors
 # Cannot be zero.
-NANO_CONFSIZE=2048
+NANO_CONFSIZE=1mb
 
 # Size of data file system in 512 bytes sectors
 # If zero: no partition configured.
@@ -650,6 +650,28 @@ customize_cmd () {
 	NANO_CUSTOMIZE="$NANO_CUSTOMIZE $1"
 }
 
+calculate_size() {
+	var=$1
+	eval "a1=\\$\{$var\}"
+	eval "a1=$a1"
+	a1=`echo $a1 | tr '[:upper:]' '[:lower:]'`
+	case $a1 in
+	*mb)
+		a1=`echo $a1 | tr -d 'mb'`
+		a1=`expr $a1 \* 1024 \* 2`
+		;;
+	*g)
+		a1=`echo $a1 | tr -d 'g'`
+		a1=`expr $a1 \* 1024 \* 1024 \* 2`
+		;;
+	*gb)
+		a1=`echo $a1 | tr -d 'gb'`
+		a1=`expr $a1 \* 1024 \* 1024 \* 2`
+		;;
+	esac
+	eval "$var=$a1"
+}
+
 #######################################################################
 #
 # All set up to go...
@@ -734,6 +756,10 @@ if [ "x${NANO_PORTSDIR}" = "x" ] ; then
 else
 	PACKAGES=${NANO_PORTSDIR}
 fi
+
+calculate_size NANO_CODESIZE
+calculate_size NANO_CONFSIZE
+calculate_size NANO_DATASIZE
 
 NANO_PACKAGE_DIR=${PACKAGES}/All
 NANO_WORLDDIR=${MAKEOBJDIRPREFIX}_.w
