@@ -527,6 +527,13 @@ cust_install_files () (
 	find . -print | grep -v /CVS | cpio -dumpv ${NANO_WORLDDIR}
 )
 
+
+cust_remove_static_library () (
+	cd ${NANO_WORLDDIR}
+	find . -name *.la -exec rm \{\} \;
+	find . -name *.a -exec rm \{\} \;
+)
+
 #######################################################################
 # Install packages from ${NANO_PACKAGE_DIR}
 
@@ -722,15 +729,15 @@ else
 fi
 
 if [ "x${NANO_PORTSDIR}" = "x" ] ; then
-	PACKAGES=${MAKEOBJDIRPREFIX}/Ports
+	PACKAGES=${MAKEOBJDIRPREFIX}Ports
 	NANO_PORTSDIR=${PACKAGES}
 else
 	PACKAGES=${NANO_PORTSDIR}
 fi
 
 NANO_PACKAGE_DIR=${PACKAGES}/All
-NANO_WORLDDIR=${MAKEOBJDIRPREFIX}/_.w
-NANO_MAKE_CONF=${MAKEOBJDIRPREFIX}/make.conf
+NANO_WORLDDIR=${MAKEOBJDIRPREFIX}_.w
+NANO_MAKE_CONF=${MAKEOBJDIRPREFIX}make.conf
 
 if [ -d ${NANO_TOOLS} ] ; then
 	true
@@ -761,6 +768,7 @@ export NANO_OBJ
 export NANO_PORTSDIR
 export NANO_PORTS
 export NANO_GEMS
+export NANO_GEM_OPTS
 export NANO_PMAKE
 export NANO_SECTS
 export NANO_SRC
@@ -772,8 +780,6 @@ export NANO_BOOTLOADER
 #######################################################################
 # And then it is as simple as that...
 
-#install_gems
-#exit 1
 clean_build
 create_builddir
 clean_world
