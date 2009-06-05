@@ -434,7 +434,7 @@ create_i386_diskimage ( ) (
 	bsdlabel ${MD}s1
 
 	# Create first image
-	newfs ${NANO_NEWFS} /dev/${MD}s1a
+	newfs ${NANO_NEWFS} -L Code1 /dev/${MD}s1a
 	mount /dev/${MD}s1a ${MNT}
 	df -i ${MNT}
 	( cd ${NANO_WORLDDIR} && find . -print | cpio -dump ${MNT} )
@@ -452,16 +452,16 @@ create_i386_diskimage ( ) (
 			sed -i "" "s/${NANO_DRIVE}s1/${NANO_DRIVE}s2/g" $f
 		done
 		umount ${MNT}
-
+		tunefs -L Code2 /dev/${MD}s2a
 	fi
 	
 	# Create Config slice
-	newfs ${NANO_NEWFS} /dev/${MD}s3
+	newfs ${NANO_NEWFS} -L Config /dev/${MD}s3
 	# XXX: fill from where ?
 
 	# Create Data slice, if any.
 	if [ $NANO_DATASIZE -gt 0 ] ; then
-		newfs ${NANO_NEWFS} /dev/${MD}s4
+		newfs ${NANO_NEWFS} -L Data /dev/${MD}s4
 		# XXX: fill from where ?
 	fi
 
@@ -509,6 +509,12 @@ cust_comconsole () (
 
 	# Tell loader to use serial console early.
 	echo " -h" > ${NANO_WORLDDIR}/boot.config
+)
+
+cust_autologin_console	() (
+	# Enable autologin on console
+	sed -i "" -e /ttyd0/s/std/al/ ${NANO_WORLDDIR}/etc/ttys
+
 )
 
 #######################################################################
