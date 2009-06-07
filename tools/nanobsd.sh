@@ -637,9 +637,12 @@ install_ports() (
 )
 
 install_gems() (
-	export GEM_HOME=${NANO_WORLDDIR}/usr/local/lib/ruby/gems/1.8
-	echo "${NANO_GEMS}" > ${MAKEOBJDIRPREFIX}/_.install_gems.sh
-	. ${MAKEOBJDIRPREFIX}/_.install_gems.sh
+	cp /etc/resolv.conf ${NANO_WORLDDIR}/etc/resolv.conf
+	#export GEM_HOME=${NANO_WORLDDIR}/usr/local/lib/ruby/gems/1.8
+	echo "gem update --system" > ${MAKEOBJDIRPREFIX}/_.install_gems.sh
+	echo "${NANO_GEMS}" >> ${MAKEOBJDIRPREFIX}/_.install_gems.sh
+	chroot ${NANO_WORLDDIR} sh ${MAKEOBJDIRPREFIX}/_.install_gems.sh
+	rm ${NANO_WORLDDIR}/etc/resolv.conf
 )
 
 load_gems() {
