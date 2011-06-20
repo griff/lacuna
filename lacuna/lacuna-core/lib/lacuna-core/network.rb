@@ -3,7 +3,7 @@ module Lacuna
     class << self
       def interfaces(flush=false)
         @network_interfaces = nil if flush
-        @network_interfaces ||= run(:ifconfig, '-l').split.map{|device| Interface.new(device)}
+        @network_interfaces ||= run(:ifconfig, '-l').split
       end
       
       def ll(mode=:active, vfaces=nil)
@@ -26,9 +26,12 @@ module Lacuna
             'plip']
         end
       end
-
+      
+      def load_config(element)
+        vlans = element.child('vlans/vlan')
+      end
     end
-
+    
     class Interface
       def self.is_macaddr(addr)
         addr = addr.to_s.strip.split(':')
@@ -59,19 +62,19 @@ module Lacuna
       end
 
       def create
-        execute :ifconfig, device, 'create'
+        execute :ifconfig, device, :create
       end
 
       def destroy
-        execute :ifconfig, device, 'destroy'
+        execute :ifconfig, device, :destroy
       end
 
       def up
-        execute :ifconfig, device, 'up'
+        execute :ifconfig, device, :up
       end
 
       def down
-        execute :ifconfig, device, 'down'
+        execute :ifconfig, device, :down
       end
       
       def restart
@@ -103,33 +106,59 @@ module Lacuna
 
         #ipv4_down
         return true unless exists?
+        
+        # Remove ipv4 addresses
         inetList = run(:ifconfig, device).
           split("\n").select {|e| e =~ /inet / }#.
         #  map{|e| e = e.strip; e unless e.empty? }.compact
         inetList.each do |e|
           if e =~ /^.*(inet (?:[0-9]{1,3}\.){3}[0-9]{1,3}).*/
-            execute :ifconfig, device, $1, 'delete'
+            execute :ifconfig, device, $1, :delete
           end
         end
-          #ifalias_down ${_if} && _ret=0
-          #ipv4_addrs_common ${_if} -alias && _ret=0
+        
+        #ifalias_down ${_if} && _ret=0
+        #ipv4_addrs_common ${_if} -alias && _ret=0
          
-         #ifconfig_down
-         _cfg = 1
-         if exists?
-           execute :ifconfig, device, 'down'
-           _cfg = 0
-         end
-         _cfg
-         
+        #ifconfig_down
+        _cfg = 1
+        if dhcp?
+          execute :dhclient, :stop device
+          _cfg = 0
+        end
+        if exists?
+          execute :ifconfig, device, :down
+          _cfg = 0
+        end
+        _cfg
       end
     end
-    class DhcpInterface < Interface
-      attr_reader :dhcp_id
+    
+    class VlanInterface < Interface
+      attr_reader :parent, :tag
+      
+      def parent=(value)
+        remove_dependency(@parent) if @parent
+        @parent = Lacuna.network.interfaces[value]
+        add_dependency(@parent)
+      end
+      
+      def create
+        parent.up
+        execute :ifconfig, parent.device, :vlanhwtag
+        execute :ifconfig, parent.device, :vlanmtu
+        super unless exists?
+        execute :ifconfig, device, :vlan, tag, :vlandev, parent.device
+      end
+      
+      def start
+        create
+        super
+      end
       
       def stop
         super
-        execute '/etc/rc.d/dhclient', 'stop' device
+        destroy
       end
     end
   end

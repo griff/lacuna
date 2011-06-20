@@ -3,8 +3,7 @@ data = IO.readlines(ARGV[0])
 File.open(ARGV[0], 'w') do |f|
   data.each do |line|
     line = line.strip
-    if line.empty? || line[0...1] == '#'
-    else
+    unless line.empty? || line[0...1] == '#'
       f.puts line
     end
   end

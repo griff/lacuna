@@ -4,26 +4,21 @@
 # REQUIRE: atm1 cleanvar ipfilter FILESYSTEMS serial sppp sysctl
 # KEYWORD: nojail
 
-def start(*devices)
-  if devices.size == 0
-    Lacuna::Network.vlans
-  end
-  interfaces = Lacuna::Network.configured_interfaces
-  interfaces.select! {|d| devices.any?{|d2| d.device==d2 } } if devices.size > 0
-  interfaces.each {|i| i.start}
-end
-
-def stop(*devices)
-  puts "Stopping interfaces..."
-#  interfaces = BSD::Network.configured_interfaces
-#  interfaces.select! {|d| devices.any?{|d2| d.device==d2 } } if devices.size > 0
-#  interfaces.each {|i| i.stop}
-end
-
 require 'rubygems'
-require 'lacuna-core'
-def respond_to_any?(o)
-  private_methods.include?(o.to_s) || public_methods.include?(o.to_s) || protected_methods.include?(o.to_s)
+require 'lacuna-core/script'
+
+start do |*devices|
+  log "Starting interfaces" do
+    interfaces = Lacuna.network.interfaces
+    interfaces.select! {|d| devices.any?{|d2| d.device == d2 || d.id == d2 } } if devices.size > 0
+    interfaces.each {|i| i.start}
+  end
 end
-cmd = ARGV.shift || 'status'
-send(cmd, *ARGV) if respond_to_any?(cmd.to_sym)
+
+stop do |*devices|
+  log "Stopping interfaces" do
+    interfaces = Lacuna.network.interfaces
+    interfaces.select! {|d| devices.any?{|d2| d.device == d2 || d.id == d2 } } if devices.size > 0
+    interfaces.each {|i| i.stop}
+  end
+end
