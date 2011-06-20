@@ -1,0 +1,17 @@
+require 'rspec/core/rake_task'
+
+task 'install' do
+  
+end
+
+task 'clean:users' do
+  `pw usershow -a`.force_encoding('ASCII-8BIT').split("\n").each do |u|
+    uid = u.split(':')[2].to_i
+    next if uid <1000 || uid > 32000
+    sh 'pw', 'userdel', uid.to_s
+  end
+end
+
+RSpec::Core::RakeTask.new(:spec)
+
+task :default => :spec

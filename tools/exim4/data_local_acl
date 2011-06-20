@@ -1,0 +1,45 @@
+  # put headers in all messages (no matter if spam or not)
+  .ifdef CHECK_DATA_SPAMASSASSIN
+  warn  
+    message = X-Spam-Score: $spam_score ($spam_bar)
+    spam = griff:true
+  
+  warn  
+    message = X-Spam-Report: $spam_report
+    spam = griff:true
+		        
+  # add second subject line with *SPAM* marker when message
+  # is over threshold
+  warn
+    message = Subject: [*SPAM*] $h_Subject:
+    spam = griff
+
+  # reject spam at high scores (> 12)
+  deny
+    message = This message scored $spam_score spam points.
+    spam = griff:true
+    condition = ${if >{$spam_score_int}{120}{1}{0}}
+  .endif  
+
+  # Reject messages that have serious MIME errors.
+  # This calls the demime condition again, but it
+  # will return cached results.
+  deny 
+    message = Serious MIME defect detected ($demime_reason)
+    demime = *
+    condition = ${if >{$demime_errorlevel}{2}{1}{0}}
+
+  # Reject file extensions used by worms.
+  # Note that the extension list may be incomplete.
+  deny
+    message = This domain has a policy of not accepting certain types of attachments \
+              in mail as they may contain a virus.  This mail has a file with a .$found_extension \
+              attachment and is not accepted.  If you have a legitimate need to send \
+              this particular attachment, send it in a compressed archive, and it will \
+              then be forwarded to the recipient.
+    demime = exe:com:vbs:bat:pif:scr
+ 
+  # Reject messages containing malware.
+  #deny 
+  #  message = This message contains a virus ($malware_name) and has been rejected
+  #  malware = */defer_ok

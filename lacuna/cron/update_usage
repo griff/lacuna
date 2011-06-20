@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby19
+
+require File.expand_path('../../config/boot',  __FILE__)
+require 'lacuna/users'
+
+Lacuna.real_users.each do |u|
+  next unless File.exists?(File.join(u.home_dir, '.usage'))
+  u.calculate_usage
+end

@@ -1,18 +1,21 @@
 Lacuna::Config.defaults do |c|
   c.paths do |p|
-    p[:prefix] = '/'
-    p[:etc] = p[:prefix] / 'etc'
-    p[:lib] = p[:prefix] / 'lib'
-    p[:sbin] = p[:prefix] / 'sbin'
-    p[:var_run] = p[:prefix] / 'var/run'
-    p[:var_log] = p[:prefix] / 'var/log'
-    p[:var_db] = p[:prefix] / 'var/db'
+    p.prefix = '/'
+    p.code = p.prefix / :usr / :local
+    p.etc = p.code / :etc
+    p.lib = p.code / :lib
+    p.sbin = p.code / :sbin
+    p.var = p.prefix / :var
+    p.var_run = p.var / :run
+    p.var_log = p.var / :log
+    p.var_db = p.var / :db
+    p.home '/var/lacuna', '/usr/lacuna'
   end
   c.product do |p|
-    p[:name] = 'RubyBSD'
-    p[:copyright] = '2009'
+    p.name = 'Lacuna'
+    p.copyright = '2011'
   end
   c.programs do |p|
-    p[:ifconfig] = c.paths[:sbin] / 'ifconfig'
+    p.ifconfig = c.paths.sbin / :ifconfig
   end
 end

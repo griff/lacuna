@@ -1,0 +1,21 @@
+#source "ftp://ftp.freebsd.org/pub/FreeBSD/ports/i386/packages-8-stable"
+source "ftp://ftp.freebsd.org/pub/FreeBSD/ports/i386/packages-8.2-release"
+
+port "ruby19", :define=>"RUBY_DEFAULT_VER=1.9"
+port "ruby-iconv", :define=>"RUBY_DEFAULT_VER=1.9"
+pkg "nginx"
+#group :mail do
+	#port "exim", :define=>'WITHOUT_EMBEDDED_PERL'
+	pkg "exim"
+	pkg "courier-imap"
+	pkg "courieruserinfo"
+	pkg "courierpasswd"
+	pkg "courier-authlib-userdb"
+	port 'mail/roundcube', :defines=>%w{WITHOUT_MYSQL WITH_SQLITE WITH_SSL}
+#end
+pkg 'bash'
+pkg 'isc-dhcp41-server'
+pkg 'rsync'
+#pkg 'fcgiwrap'
+#pkg 'spawn-fcgi'
+pkg 'sudo'

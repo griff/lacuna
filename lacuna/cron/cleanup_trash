@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby19
+
+require File.expand_path('../../config/boot',  __FILE__)
+require 'lacuna/trash'
+
+Lacuna.user_trash.each do |t|
+  #puts "Looking at trash #{t.autodelete} #{Time.now.to_i}"
+  t.remove if t.autodelete < Time.now.to_i
+end

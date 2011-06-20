@@ -1,0 +1,8 @@
+#Every week
+dump -0Lauf - /var | gzip - >> /usr/obj/dump-week.[date].gz
+
+#Every day
+dump -1Lauf - /var | gzip - >> /usr/obj/dump-day.[mon-sun].gz
+
+#Every hour
+dump -2Lauf - /var | gzip - >> /usr/obj/dump-hour.[0-23].gz

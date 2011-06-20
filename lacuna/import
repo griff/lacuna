@@ -1,0 +1,48 @@
+#!/usr/bin/env ruby19
+require 'pathname'
+ENV['BUNDLE_GEMFILE'] ||= File.expand_path("../Gemfile",
+  Pathname.new(__FILE__).realpath)
+
+dirname = File.dirname(__FILE__)
+$LOAD_PATH.push(File.join(dirname, 'lib'))
+
+require 'rubygems'
+require 'bundler'
+Bundler.require
+require 'csv'
+require 'lacuna/users'
+
+domain = 'vagtelhave.dk' || Lacuna.domain
+
+users = []
+aliases = []
+CSV.foreach(ARGV[0], :col_sep=>';', :headers=>true) do |row|
+  email = row['E-mail']
+  password = row['kode']
+  puts row unless email.end_with?("@#{domain}")
+  email.sub!(/@[^@]+$/, '')
+  if email.size <= 16
+    users << [email, password]
+  else
+    aliases << [email, password]
+    puts email
+  end
+end
+puts "#{users.size} #{aliases.size}"
+aliases.each{|u,kode| users << [u[0..15], kode] }
+
+api = JSON.parse(RestClient.get('http://10.42.1.92/api', :accept=>'application/json'))
+
+token_json = JSON.parse(RestClient.post(api['auth'], :username=>'admin', :password=>'lacuna', :client_id=>1, :grant_type=>'password'))
+token = token_json['access_token']
+puts "Using token: #{token}"
+
+users.each do |name,kode|
+  puts "Creating user #{name}"
+  RestClient.post(api['users'], {:name=>name, :password=>kode}, :Authorization=>"Bearer #{token}")
+end
+
+aliases.each do |name,kode|
+  puts "Creating alias #{name}"
+  RestClient.post(api['mail_aliases'], {:user=>name[0..15], :name=>name}, :Authorization=>"Bearer #{token}")
+end

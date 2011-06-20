@@ -1,0 +1,10 @@
+
+set_rcvar lacuna_enable NO "Set it to \"YES\" to enable lacuna"
+if [ -d "/var/lacuna" ] ; then
+  set_rcvar lacuna_home /var/lacuna "Installation directory of lacuna"
+else
+  set_rcvar lacuna_home /usr/lacuna "Installation directory of lacuna"
+fi
+
+# read settings, set default values
+load_rc_config 'lacuna'

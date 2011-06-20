@@ -13,13 +13,18 @@ while [ -h "$PRG" ]; do
 done
 
 # Get standard environment variables
-LACUNA_SRC=`dirname "$PRG"`
+LACUNA_TOOLS=`dirname "$PRG"`
+LACUNA_SRC=$LACUNA_TOOLS/../lacuna
+export LACUNA_TOOLS
 export LACUNA_SRC
 
 NANO_TOOLS=/usr/src/tools/tools/nanobsd
 
 if [ -f "${NANO_TOOLS}/nanobsd.sh" ] ; then
-  sh ${NANO_TOOLS}/nanobsd.sh -c $LACUNA_SRC/nano.conf $@
+  sh ${NANO_TOOLS}/nanobsd.sh -c $LACUNA_TOOLS/nano.conf $@
+  #cd $NANO_WORLDDIR do
+    #sh mkisofs -J -R -no-emul-boot -b boot/cdboot -iso-level 3 -o nanobsd.iso .
+  #end
 else
   echo "nanobsd.sh script not found" 1>&2
   exit 1

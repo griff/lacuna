@@ -1,0 +1,349 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Mail Administrator</title>
+  <meta name="generator" content="TextMate http://macromates.com/">
+  <meta name="author" content="Brian Olsen">
+  <!-- Date: 2011-05-29 -->
+  <link rel="stylesheet" href="css/trontastic/jquery-ui-1.8.13.custom.css" type="text/css" media="screen" title="no title" charset="utf-8">
+  <link rel="stylesheet" href="css/fancybox/jquery.fancybox-1.3.4.css" type="text/css" media="screen" title="no title" charset="utf-8">
+  <style type="text/css" media="screen">
+    .loading td, .empty td {height: 40px; vertical-align:middle;text-align:center;}
+    .hide, .empty {display:none;}
+    .messages {display:none;padding: 0 .7em;}
+    .messages .ui-icon {float: left; margin-right: .3em;}
+    span.delete,span.edit,span.restore {text-decoration:underline;cursor:pointer;}
+    td.center {text-align: center;}
+    td {border: dotted gray 1px; padding-left:.4em;}
+    table {border-spacing: 2px 4px; width: 100%;}
+    #user-add, #alias-add {margin-top:0px;}
+    #user-add .ui-button-text, #alias-add .ui-button-text {padding-top:0px;padding-bottom:0px;}
+    h2 {font-family: 'Segoe UI', Helvetica, Arial, sans-serif;font-size: 1.1em; margin: 0px;padding-top:0.6em;}
+    body {font-size: 14px;}
+  </style>
+  <script src="js/jquery-1.5.1.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="js/jquery-ui-1.8.13.custom.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="js/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
+  <script src="js/jquery.easing-1.3.pack.js" type="text/javascript" charset="utf-8"></script>
+  <script src="js/jquery.mousewheel-3.0.4.pack.js" type="text/javascript" charset="utf-8"></script>
+  <script src="js/jquery.fancybox-1.3.4.pack.js" type="text/javascript" charset="utf-8"></script>
+  <script src="js/jquery.hotkeys.js" type="text/javascript" charset="utf-8"></script>
+  <script src="js/jquery-ui.dialog-allowClose.js" type="text/javascript" charset="utf-8"></script>
+  <script src="js/jquery-ui.dialog-buttonOnEnter.js" type="text/javascript" charset="utf-8"></script>
+  <script src="js/users.js" type="text/javascript" charset="utf-8"></script>
+  <script src="js/mails.js" type="text/javascript" charset="utf-8"></script>
+  <script type="text/javascript" charset="utf-8">
+    var loaded = false, api,
+        auth = {},
+        at = $.cookie('token'),
+        latest_username=null;
+    
+    if(at) {
+      auth.access_token = at;
+    }
+    
+    $.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
+      if(auth.access_token && !options.ignoreOAuthToken) {
+        if(!options.headers) {
+          options.headers = {};
+        }
+        options.headers.Authorization =  'Bearer '+auth.access_token;
+      }
+    });
+    
+    $(window).bind('loadedtoken', function(event, access_token, expires_in){
+        $.ajaxSetup({
+          statusCode: {
+            401: function(xhr) {
+              auth.access_token = null;
+              $(window).trigger('login');
+            }
+          }
+        });
+        auth.access_token = access_token;
+        if(auth.refreshTimer)
+          clearTimeout(auth.refreshTimer)
+        if(expires_in) {
+          //console.log('Setting expires timer to', expires_in);
+          auth.refreshTimer = setTimeout(function(){$(window).trigger('refreshtoken', access_token);},(expires_in-30)*1000);
+        } else {
+          $.getJSON(api.token_info, function(data) {
+            //console.log('Setting expires timer to', data.expires_in);
+            auth.refreshTimer = setTimeout(function(){$(window).trigger('refreshtoken', access_token);},(data.expires_in-30)*1000);
+          });
+        }
+        $(window).trigger('authenticated');
+    });
+    
+    $(window).bind('refreshtoken', function(event, access_token) {
+      $.ajax({
+        url:api.auth,
+        ignoreOAuthToken:true,
+        type:'POST',
+        dataType:'json',
+        data: {client_id:1, grant_type:'refresh_token', refresh_token:access_token},
+        success: function(data, xhr) {
+          var expires = new Date();
+          expires.setTime(expires.getTime() + data.expires_in*1000);
+          $.cookie('token', data.access_token, { expires: expires, path: '/'});
+          $(window).trigger('loadedtoken', data.access_token, data.expires_in);
+        },
+        error: function() {
+          $(window).trigger('login');
+        }
+      });
+    });
+
+    $.ajax({
+      url:'/api',
+      type:'GET',
+      dataType:'json',
+      ignoreOAuthToken:true,
+      success:function(data) {
+        api = data;
+        if(loaded) {
+          $.fancybox.hideActivity();
+          if(auth.access_token) {
+            $(window).trigger('loadedtoken', auth.access_token);
+          } else {
+            $(window).trigger('login');
+          }
+        }
+      }
+    });
+    
+    $(function() {
+      $.fancybox.showActivity();
+      
+      // Show overlay box with result on ajax errors
+      $(document.body).ajaxError(function(event, xhr, options, exception) {
+        //console.log("Ajax error ", event, xhr, " ", xhr.status, " ", xhr.readyState, " ", exception);
+        //var content = $('<div>'+exception+'</div>');
+        if( xhr.readyState === 4 && xhr.status >= 500 && xhr.responseText !== "" ) {
+          if(xhr.getResponseHeader( "content-type" ) === "text/plain") {
+            var c = $('<pre></pre>').text(xhr.responseText);
+            $.fancybox({content:c[0]});
+          } else {
+            $.fancybox(xhr.responseText);
+          }
+        }
+      });
+          
+      loaded = true;
+      if(api) {
+        $.fancybox.hideActivity();
+        if(auth.access_token) {
+          $(window).trigger('loadedtoken', auth.access_token, api.token_expires_in);
+        } else {
+          $(window).trigger('login');
+        }
+        //console.log('Trigger start login');
+      }
+      
+    });
+
+    $(window).bind('login', function(e) {
+      var login = $('#login');
+      login.dialog({
+        modal:true,
+        allowClose:false,
+        buttonOnEnter:':first',
+        buttons:{
+          'Log ind': function() {
+            $.fancybox.showActivity();
+            var self=$(this),
+                username = $('#username', self).val(),
+                password = $('#password', self).val();
+            $.ajax({
+              url:api.auth,
+              type:'POST',
+              dataType:'json',
+              data: {client_id:1, grant_type:'password', username:username, password:password},
+              headers: {},
+              success: function(data, xhr) {
+                $.fancybox.hideActivity();
+                var expires = new Date();
+                expires.setTime(expires.getTime() + data.expires_in*1000);
+                $.cookie('token', data.access_token, { expires: expires, path: '/'});
+                $(window).trigger('loadedtoken', data.access_token, data.expires_in);
+                self.dialog('close');
+              },
+              statusCode: {
+                400: function(xhr) {
+                  $.fancybox.hideActivity();
+                  data = $.parseJSON(xhr.responseText);
+                  message = data.error;
+                  if(data.error_description) {
+                    message = data.error_description;
+                  }
+                  $('.messages strong', login).text(message).parent().show();
+                },
+                401: function(xhr) {
+                  $.fancybox.hideActivity();
+                  data = $.parseJSON(xhr.responseText);
+                  message = data.error;
+                  if(data.error_description) {
+                    message = data.error_description;
+                  }
+                  $('.messages strong', login).text(message).parent().show();
+                }
+              }
+            });
+          }
+        },
+
+      });
+    });
+
+    
+    $(window).bind('authenticated', function(e) {
+      //console.log('Authenticated');
+
+      $(window).trigger('usersreload');
+      $(window).trigger('trashreload');
+      $(window).trigger('mailaliasessreload');
+      $(window).trigger('mailsreload');
+    });
+
+  </script>
+</head>
+<body>
+  <div id="users-container" style="position:relative;margin-top:1px;margin-bottom:1em;">
+    <div style="width:69%; margin-right:10px;position:relative;float:left">
+    <h2>Brugere</h2>
+    <button id="user-add" style="position:absolute;right:0px;top:0px">Lav bruger</button>
+    <table id="users" class="ui-widget ui-widget-content" tabindex='1'>
+      <thead class="ui-widget-header">
+        <tr>
+          <th>Brugernavn</th>
+          <th>Beskrivelse</th>
+          <th>Pladsforbrug</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody class="loading">
+        <tr>
+          <td colspan="4">
+            <img src="css/loading.gif" style="width:100%; height:19px">
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h2>Slettede brugere</h2>
+    <table id="trash" class="ui-widget ui-widget-content" tabindex='3'>
+      <thead class="ui-widget-header">
+        <tr>
+          <th>Brugernavn</th>
+          <th>Foldernavn</th>
+          <th>Slette dato</th>
+          <th>Dage til automatisk oprydning</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody class="loading">
+        <tr>
+          <td colspan="5">
+            <img src="css/loading.gif" style="width:100%; height:19px">
+          </td>
+        </tr>
+      </tbody>
+      <tbody class="empty">
+        <tr>
+          <td colspan="5">Ingen slettede bruger</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+    <div style="float:left;width:30%">
+      <h2>Mail aliaser</h2>
+      <button id="alias-add" style="position:absolute;right:4px;top:0px">Lav alias</button>
+      <table id="mail_aliases" class="ui-widget ui-widget-content" tabindex='2'>
+        <thead class="ui-widget-header">
+          <tr>
+            <th>Alias</th>
+            <th>Brugernavn</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody class="loading">
+          <tr>
+            <td colspan="3">
+              <img src="css/loading.gif" style="width:100%; height:19px">
+            </td>
+          </tr>
+        </tbody>
+        <tbody class="empty">
+          <tr>
+            <td colspan="3">Ingen mail aliaser defineret</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div id="mailqueue-container" style="clear:both">
+    <h2>Mails der venter på at blive leveret</h2>
+    <table id="mailqueue" class="ui-widget ui-widget-content" tabindex='4'>
+      <thead class="ui-widget-header">
+        <tr>
+          <th>Tid tilbragt i køen</th>
+          <th>Størrelse</th>
+          <th>Id</th>
+          <th>Fra</th>
+          <th>Til</th>
+          <th>Frossen</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody class="loading">
+        <tr>
+          <td colspan="7">
+            <img src="css/loading.gif" style="width:100%; height:19px">
+          </td>
+        </tr>
+      </tbody>
+      <tbody class="empty">
+        <tr>
+          <td colspan="7">Ingen mails i køen</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div id="login" class="hide" title="Log in">
+    <div class="messages ui-state-error ui-corner-all">
+      <span class="ui-icon ui-icon-alert"></span>
+      <strong>Alert</strong>
+    </div>
+    <label for="username">Brugernavn</label><br>
+    <input type="text" name="username" id="username" maxlength="16" class="ui-widget-content ui-corner-all"><br>
+    <label for="password">Kodeord</label><br>
+    <input type="password" name="password" id="password" size="16" class="ui-widget-content ui-corner-all">
+  </div>
+  <div id="user" class="hide">
+    <div class="messages ui-state-error ui-corner-all">
+      <span class="ui-icon ui-icon-alert"></span>
+      <strong>Alert</strong>
+    </div>
+    <label for="user_name">Brugernavn</label><br>
+    <input id="user_name" type="text" name="name" maxlength="16" class="ui-widget-content ui-corner-all"><br>
+    <label for="user_gecos">Beskrivelse</label><br>
+    <input id="user_gecos" type="text" name="gecos" class="ui-widget-content ui-corner-all"><br>
+    <label for="user_password">Kodeord</label><br>
+    <input id="user_password" type="password" name="password" class="ui-widget-content ui-corner-all"><br>
+    <label for="user_password_repeat">Gentag kodeord</label><br>
+    <input id="user_password_repeat" type="password" name="password_repeat" class="ui-widget-content ui-corner-all">
+  </div>
+  <div id="alias" class="hide" title="Lav alias">
+    <div class="messages ui-state-error ui-corner-all">
+      <span class="ui-icon ui-icon-alert"></span>
+      <strong>Alert</strong>
+    </div>
+    <label for="alias_user">Brugernavn</label><br>
+    <input type="text" name="user" id="alias_user" maxlength="16" class="ui-widget-content ui-corner-all"><br>
+    <label for="alias_name">Alias</label><br>
+    <input type="text" name="name" id="alias_name" size="16" class="ui-widget-content ui-corner-all">
+  </div>
+</body>
+</html>

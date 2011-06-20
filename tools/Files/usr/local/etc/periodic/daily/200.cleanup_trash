@@ -1,0 +1,7 @@
+#!/bin/sh
+
+. /etc/subr
+. /usr/local/etc/lacuna.subr
+
+$lacuna_home/cron/cleanup_trash
+

@@ -1,0 +1,39 @@
+
+### auth/25_custom_auth
+#################################
+
+# Authenticate against courier authdaemon
+
+# This is now the (working!) example from
+# http://www.exim.org/eximwiki/FAQ/Policy_controls/Q0730
+# Possible pitfall: access rights on /var/run/courier/authdaemon/socket.
+plain_courier_authdaemon:
+  driver = plaintext
+  public_name = PLAIN
+  server_condition = \
+    ${extract {ADDRESS} \
+              {${readsocket{/var/run/courier/authdaemon/socket} \
+              {AUTH ${strlen:exim\nlogin\n$auth2\n$auth3\n}\nexim\nlogin\n$auth2\n$auth3\n} }} \
+              {yes} \
+              fail}
+  server_set_id = $auth2
+  .ifndef AUTH_SERVER_ALLOW_NOTLS_PASSWORDS
+  server_advertise_condition = ${if eq{$tls_cipher}{}{}{*}}
+  .endif
+
+login_courier_authdaemon:
+  driver = plaintext
+  public_name = LOGIN
+  server_prompts = Username:: : Password::
+  server_condition = \
+    ${extract {ADDRESS} \
+              {${readsocket{/var/run/courier/authdaemon/socket} \
+              {AUTH ${strlen:exim\nlogin\n$auth1\n$auth2\n}\nexim\nlogin\n$auth1\n$auth2\n} }} \
+              {yes} \
+              fail}
+  server_set_id = $auth1
+  .ifndef AUTH_SERVER_ALLOW_NOTLS_PASSWORDS
+  server_advertise_condition = ${if eq{$tls_cipher}{}{}{*}}
+  .endif
+
+

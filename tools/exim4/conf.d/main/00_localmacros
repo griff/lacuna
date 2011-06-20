@@ -1,0 +1,22 @@
+CHECK_DATA_LOCAL_ACL_FILE = CONFDIR/data_local_acl
+MAIN_ACL_CHECK_MAIL = ${if ={25}{$interface_port} \
+                     {acl_check_mail} {acl_check_mail_submit} }
+
+# This tells what virus scanner to use
+#av_scanner = clamd:/var/run/clamav/clamd.ctl
+
+#CHECK_RCPT_VERIFY_SENDER = yes
+MAIN_TLS_ENABLE = yes
+
+MAIN_LOCAL_DOMAINS = @:localhost:dsearch;/etc/mail/virtual
+
+#MAIN_RELAY_NETS = 127.0.0.1 : ::::1 : DEBCONFrelay_netsDEBCONF
+
+MAIN_LOG_SELECTOR = +tls_cipher +tls_peerdn
+
+MAIN_LOCAL_INTERFACES = <; ::0 ; 0.0.0.0 ; ::0.587 ; 0.0.0.0.587
+
+FIRST_USER_ACCOUNT_UID = 1000
+
+MAIN_SMTP_BANNER = "${primary_hostname} ESMTP Exim ${tod_full}"
+smtp_banner = $smtp_active_hostname ESMTP Exim $tod_full

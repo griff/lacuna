@@ -24,7 +24,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $FreeBSD: src/tools/tools/nanobsd/Files/root/updatep2,v 1.2.6.1 2008/11/25 02:59:29 kensmith Exp $
+# $FreeBSD: src/tools/tools/nanobsd/Files/root/updatep2,v 1.2.10.1.6.1 2010/12/21 17:09:25 kensmith Exp $
 #
 # Script to update partition 2 on a NanoBSD system.
 #
@@ -58,4 +58,6 @@ sed -i "" "s/${NANO_DRIVE}s1/${NANO_DRIVE}s2/" /mnt/conf/base/etc/fstab
 sed -i "" "s/${NANO_DRIVE}s1/${NANO_DRIVE}s2/" /mnt/etc/fstab
 umount /mnt
 trap 1 2 15 EXIT
-boot0cfg -s 2 -v ${NANO_DRIVE}
+
+#boot0cfg -s 2 -v ${NANO_DRIVE}
+gpart set -a active -i 2 ${NANO_DRIVE}

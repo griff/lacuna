@@ -1,0 +1,59 @@
+#!/bin/sh
+#
+# $FreeBSD: src/etc/rc.d/root,v 1.17.2.1.6.1 2010/12/21 17:09:25 kensmith Exp $
+#
+
+# PROVIDE: vardisk
+# REQUIRE: FILESYSTEMS
+# BEFORE: var
+
+. /etc/rc.subr
+
+name="vardisk"
+start_cmd="vardisk_start"
+stop_cmd=":"
+
+set_rcvar vardisk_device 'ufs/vardisk' "Device to mount var on"
+set_rcvar vardisk_populate 'auto' "Should be populate the var disk with the contents of /conf/base/var"
+
+load_rc_config $name
+
+populate_vardisk()
+{
+	echo "Copying data to vardisk"
+	cp -Rp /conf/base/var/ /var
+}
+
+vardisk_start()
+{
+	if [ -b "/dev/$vardisk_device" -o -c "/dev/$vardisk_device" ] ; then
+		# If we have an empty looking /var, populate it.
+		case "${vardisk_populate}" in
+		[Yy][Ee][Ss])
+			populate_vardisk
+			;;
+		[Nn][Oo])
+			exit 0
+			;;
+		*)
+			if [ -d /var/run -a -d /var/db -a -d /var/empty ] ; then
+				true
+			elif [ -x /usr/sbin/mtree ] ; then
+				populate_vardisk
+			else
+				# We need mtree to populate /var so try mounting /usr.
+				# If this does not work, we can not boot so it is OK to
+				# try to mount out of order.
+				mount /usr
+				if [ ! -x /usr/sbin/mtree ] ; then
+					exit 1
+				else
+					populate_vardisk
+				fi
+			fi
+			;;
+		esac
+	fi
+}
+
+run_rc_command "$1"

@@ -1,0 +1,4 @@
+source "http://rubygems.org"
+
+gem 'gembuilder'
+gem 'bundler'

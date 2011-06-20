@@ -1,0 +1,28 @@
+#!/bin/sh
+#
+# $FreeBSD: src/etc/rc.d/root,v 1.17.2.1.6.1 2010/12/21 17:09:25 kensmith Exp $
+#
+
+# PROVIDE: vardisk_prepare
+# REQUIRE: localswap
+# BEFORE: fsck
+# KEYWORD: nojail
+
+. /etc/rc.subr
+
+name="vardisk_prepare"
+start_cmd="vardisk_prepare_start"
+stop_cmd=":"
+
+set_rcvar vardisk_device 'ufs/vardisk' "Device to mount var on"
+
+load_rc_config $name
+
+vardisk_prepare_start()
+{
+  if [ -b "/dev/$vardisk_device" -o -c "/dev/$vardisk_device" ] ; then
+  	echo "/dev/$vardisk_device /var ufs rw 2 2" >> /etc/fstab
+  fi
+}
+
+run_rc_command "$1"

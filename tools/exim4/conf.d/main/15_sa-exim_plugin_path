@@ -1,0 +1,9 @@
+# This will enable sa-exim, but it won't actually scan and possibly reject
+# messsages before you enable this in sa-exim.conf (see SAEximRunCond)
+#
+# For a starter, you'd probably want to read the documentation at:
+#   /usr/share/doc/sa-exim/README.Debian
+# and
+#   /usr/share/doc/sa-exim/README.gz
+#
+local_scan_path = /usr/lib/exim4/local_scan/sa-exim.so

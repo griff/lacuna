@@ -1,0 +1,8 @@
+#!/usr/local/bin/perl
+$id = $ARGV[0];
+if ($id =~ /^[\w\d][\w\d-_]*$/) {
+        exit(system("exim -Mf  $id"));
+} else {
+        printf("Invalid id '$id'\n");
+        exit(1);
+}

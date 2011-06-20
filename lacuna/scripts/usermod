@@ -1,0 +1,13 @@
+
+$cmd = $ARGV[0];
+case($cmd) {
+when 'delete':
+	
+	break;
+when 'modify':
+	
+	break;
+defaul:
+	printf("Invalid command $cmd\n");
+	exit(1);
+}

@@ -1,0 +1,44 @@
+#!/bin/sh
+# $FreeBSD: ports/www/nginx/files/nginx.sh.in,v 1.9 2010/03/28 04:44:54 dougb Exp $
+
+# PROVIDE: lacuna
+# REQUIRE: LOGIN cleanvar
+# KEYWORD: shutdown
+
+#lacuna_enable=${lacuna_enable-"NO"}   # Run lacuna_enable (YES/NO).
+#lacuna_home=${lacuna_home-"NO"}   # Run courier-authdaemond (YES/NO).
+
+#
+# Add the following lines to /etc/rc.conf to enable lacuna:
+# lacuna_enable (bool):         Set to "NO" by default.
+#                               Set it to "YES" to enable lacuna
+# lacuna_home (str):            Set to "/usr/lacuna" by default.
+#                               Installation directory of lacuna
+
+. /etc/rc.subr
+. /usr/local/etc/lacuna.subr
+
+name="lacuna"
+rcvar=`set_rcvar`
+
+export PATH=$PATH:/usr/local/bin:/usr/local/sbin
+
+varprefix="/var/run/lacuna"
+pidfile="${varprefix}.pid"
+socketfile="${varprefix}.socket"
+
+#command=/usr/local/bin/spawn-fcgi
+#command_args="-d $lacuna_home -M 0777 -s $socketfile -P $pidfile -- /usr/local/sbin/fcgiwrap"
+#procname=/usr/local/sbin/fcgiwrap
+#cleanup() (
+#  rm $pidfile
+#  rm $socketfile
+#)
+#stop_postcmd=cleanup
+
+command=$lacuna_home/bin/thin
+command_interpreter=ruby19
+procname=thin
+command_args="-S $socketfile -R $lacuna_home/config.ru -l /var/log/lacuna.log -P $pidfile -d start"
+
+run_rc_command "$1"
