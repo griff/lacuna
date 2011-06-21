@@ -1,0 +1,91 @@
+#!/usr/bin/env ruby19
+require 'pathname'
+ENV['BUNDLE_GEMFILE'] ||= File.expand_path("../../Gemfile",
+  Pathname.new(__FILE__).realpath)
+
+$LOAD_PATH.push(File.expand_path('../../lib', __FILE__))
+
+require 'rubygems'
+require 'bundler'
+Bundler.require
+require 'set'
+require 'lacuna/fileutils'
+
+def contents(dir)
+  Dir.entries(dir).delete_if{|d| d == '.' || d == '..' }
+end
+
+def test_mails(owner, src, dst)
+  src_contents = contents(src)
+  dst_contents = contents(dst)
+  dst_cur = contents("#{dst}/cur").to_set
+  src_cur = contents("#{src}/cur")
+  dst_new = contents("#{dst}/new").to_set
+  src_new = contents("#{src}/new")
+  src_folders = src_contents.find_all{|d| d[0] == '.'}
+  dst_folders = dst_contents.find_all{|d| d[0] == '.'}
+
+  if src_folders.size > 0
+    if dst_folders.size == 0
+      src_folders.each do |s|
+        FileUtils.mv("#{src}/#{s}", "#{dst}/#{s}")
+      end
+    else
+      puts "#{owner} has folders"
+    end
+  end
+  if src_cur.size == 0 && src_new.size == 0
+    #puts "no mails for #{owner} #{src_folders.size>0 ? src_folders.size : ''}"
+  else
+    if src_cur.size > 0
+      raise "Current mails in common for #{owner}" if src_cur.any?{|s| dst_cur.include?(s)}
+      puts "#{owner} current folder (#{src_cur.size} items) needs merge" if dst_cur.size > 0
+      #if dst_cur.size == 0
+        src_cur.each do |s|
+          FileUtils.mv("#{src}/cur/#{s}", "#{dst}/tmp/#{s}")
+          File.link("#{dst}/tmp/#{s}", "#{dst}/cur/#{s}")
+          File.unlink("#{dst}/tmp/#{s}")
+        end
+      #end
+    end
+    if src_new.size > 0
+      raise "New mails in common for #{owner}" if src_new.any?{|s| dst_new.include?(s)}
+      src_new.each do |s|
+        FileUtils.mv("#{src}/new/#{s}", "#{dst}/tmp/#{s}")
+        File.link("#{dst}/tmp/#{s}", "#{dst}/new/#{s}")
+        File.unlink("#{dst}/tmp/#{s}")
+      end
+    end
+  end
+  #puts "#{owner} cur(#{src_cur.size})=>#{dst_cur.size} new(#{src_new.size})=>#{dst_new.size} folders(#{src_folders.size})=>#{dst_folders.size}"
+end
+
+api = JSON.parse(RestClient.get('http://localhost/api', :accept=>'application/json'))
+
+token_json = JSON.parse(RestClient.post(api['auth'], :username=>'admin', :password=>'lacuna', :client_id=>1, :grant_type=>'password'))
+token = token_json['access_token']
+puts "Using token: #{token}"
+
+aliases = JSON.parse(RestClient.get(api['mail_aliases'], :Authorization=>"Bearer #{token}"))
+aliases = Hash[aliases.map{|e| [e['name'], e['user']]}]
+puts aliases.inspect
+
+Dir["#{ARGV[0]}/*"].each do |d|
+  owner = File.basename(d)
+  home = "/var/home/" + owner + "/Maildir"
+  unless File.directory?(home)
+    owner = aliases[owner]
+    home = "/var/home/#{owner}/Maildir"
+    if owner && File.directory?(home)
+      FileUtils.sh("chown", '-R', owner, d)
+      FileUtils.sh("chgrp", '-R', owner, d)
+      test_mails(owner, d, home)
+    else
+      puts "No match for #{File.basename(d)}"
+    end
+  else
+    FileUtils.sh("chown", '-R', owner, d)
+    FileUtils.sh("chgrp", '-R', owner, d)
+    test_mails(owner, d, home)
+  end
+end
