@@ -92,7 +92,7 @@ class CommandPipe
   
   def run
     unless completed?
-      mode = input.nil? "r" : "r+"
+      mode = input.nil? ? "r" : "r+"
       output = IO.popen(cmd, mode) do |io|
         unless input.nil?
           io.write(input.to_s)
@@ -198,7 +198,7 @@ module FileUtils
       }
     end
     fu_check_options options, OPT_TABLE['sh']
-    fu_output_message(first.respond_to?(:show_command) ? first.show_command ? cmd.join(" ")) if options[:verbose]
+    fu_output_message(first.respond_to?(:show_command) ? first.show_command : cmd.join(" ")) if options[:verbose]
     unless options[:noop]
       if first.respond_to? :run
         first.run
@@ -227,7 +227,7 @@ module FileUtils
       }
     end
     fu_check_options options, OPT_TABLE['capture_sh']
-    fu_output_message(first.respond_to?(:show_command) ? first.show_command ? cmd.join(" ")) if options[:verbose]
+    fu_output_message(first.respond_to?(:show_command) ? first.show_command : cmd.join(" ")) if options[:verbose]
     unless options[:noop]
       if first.respond_to? :run
         first.run
