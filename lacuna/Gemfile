@@ -10,4 +10,5 @@ group :development do
   gem "sinatra-reloader"
   gem 'rake'
   gem 'rspec'
+  gem 'rack-test'
 end

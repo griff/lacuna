@@ -1,0 +1,170 @@
+
+/set type=file uname=root gname=wheel mode=0755
+.               type=dir
+    .DS_Store       mode=0644
+
+/set type=file uname=root gname=wheel mode=0644
+    etc             type=dir mode=0755
+        aliases        
+        motd           
+        nsswitch.conf  
+        pw.conf        
+        rc.conf        
+
+        mail            type=dir mode=0755
+            mailer.conf    
+        ..
+
+
+/set type=file uname=root gname=wheel mode=0755
+        rc.d            type=dir
+            vardisk        
+            vardisk_prepare
+        ..
+
+
+/set type=file uname=root gname=wheel mode=0644
+        ssh             type=dir mode=0755
+            sshd_config    
+        ..
+
+    ..
+
+
+    root            type=dir mode=0755
+        update         
+        updatep1       
+        updatep2       
+
+/set type=file uname=root gname=wheel mode=0600
+        .ssh            type=dir mode=0755
+            authorized_keys
+        ..
+
+    ..
+
+
+/set type=file uname=root gname=wheel mode=0755
+    usr             type=dir
+
+        local           type=dir
+
+            etc             type=dir
+                dhcpd.conf      mode=0644
+                lacuna.subr     mode=0644
+                php.ini         mode=0444
+
+/set type=file uname=root gname=wheel mode=0644
+                exim            type=dir mode=0755
+                    configure      
+                ..
+
+
+                nginx           type=dir mode=0755
+                    nginx.conf     
+                ..
+
+
+/set type=file uname=root gname=wheel mode=0755
+                periodic        type=dir
+
+                    daily           type=dir
+                        200.cleanup_trash
+                        200.update_usage
+                    ..
+
+                ..
+
+
+                rc.d            type=dir
+                    courier-authdaemond
+                    lacuna         
+                    php-cgi        
+                ..
+
+
+/set type=file uname=root gname=wheel mode=0440
+                sudoers.d       type=dir mode=0711
+                    admin          
+                ..
+
+            ..
+
+
+/set type=file uname=root gname=wheel mode=0755
+            www             type=dir
+
+/set type=file uname=root gname=wheel mode=0644
+                roundcube       type=dir mode=0755
+                    phpinfo.php    
+
+                    config          type=dir mode=0755
+                        db.inc.php     
+                        main.inc.php   
+                    ..
+
+                ..
+
+            ..
+
+        ..
+
+
+/set type=file uname=root gname=wheel mode=0755
+        share           type=dir
+
+/set type=file uname=root gname=wheel mode=0644
+            skel            type=dir mode=0755
+                .usage         
+            ..
+
+        ..
+
+    ..
+
+
+/set type=file uname=root gname=wheel mode=0755
+    var             type=dir
+
+/set type=file uname=www gname=www mode=0755
+        db              type=dir uname=root gname=wheel
+
+/set type=file uname=www gname=www mode=0644
+            roundcube       type=dir mode=0755
+                roundcube.db   
+            ..
+
+        ..
+
+
+/set type=file uname=root gname=wheel mode=0644
+        home.trash      type=dir mode=0755
+            .keep          
+        ..
+
+
+/set type=file uname=www gname=www mode=0755
+        log             type=dir uname=root gname=wheel
+
+/set type=file uname=www gname=www mode=0644
+            roundcube       type=dir mode=0755
+                .keep          
+            ..
+
+        ..
+
+
+/set type=file uname=www gname=www mode=0755
+        tmp             type=dir uname=root gname=wheel
+
+/set type=file uname=www gname=www mode=0644
+            roundcube       type=dir mode=0755
+                .keep          
+            ..
+
+        ..
+
+    ..
+
+..
+

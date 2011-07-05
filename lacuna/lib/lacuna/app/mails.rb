@@ -39,13 +39,15 @@ class Lacuna::App::Mails < Lacuna::App::Base
   end
 
   get '/queue' do
+    require_scope 'all'
     content_type :json
     Lacuna.mails.map {|m| mail_json(m)}.to_json
   end
 
   get '/queue/:id' do
     m = Lacuna.find_mail(params[:id])
-    halt 404 unless m
+    not_found unless m
+    require_scope 'all'
     content_type :json
     mail_json(m).to_json
   end
@@ -53,6 +55,7 @@ class Lacuna::App::Mails < Lacuna::App::Base
   delete '/queue/:id' do
     mail = Lacuna.find_mail(params[:id])
     halt 204 unless mail
+    require_scope 'all'
     content_type :json
     mail.remove
     mail_json(mail).to_json
@@ -61,6 +64,7 @@ class Lacuna::App::Mails < Lacuna::App::Base
   delete '/queue/frozen/:id' do
     mail = Lacuna.find_mail(params[:id])
     halt 204 unless mail && mail.frozen?
+    require_scope 'all'
     content_type :json
     mail.thaw
     mail_json(mail).to_json
@@ -69,28 +73,30 @@ class Lacuna::App::Mails < Lacuna::App::Base
   delete '/queue/active/:id' do
     mail = Lacuna.find_mail(params[:id])
     halt 204 unless mail && !mail.frozen?
+    require_scope 'all'
     content_type :json
     mail.freeze
     mail_json(mail).to_json
   end
   
   get '/aliases' do
+    require_scope 'all'
     content_type :json
     Lacuna.mail_aliases.map {|m| mail_alias_json(m)}.to_json
   end
   
   post '/aliases' do
+    require_scope 'all'
     name, user = params[:name], params[:user]
-    halt_json 400, {:error=>'missing_username', :error_description=>'Brugernavn mangler'} unless user
-    halt_json 400, {:error=>'missing_alias', :error_description=>'Alias mangler'} unless name
-    name, user = name.strip, user.strip
+    #halt_json 400, {:error=>'missing_username', :error_description=>'Brugernavn mangler'} unless user
+    #halt_json 400, {:error=>'missing_alias', :error_description=>'Alias mangler'} unless name
+    name = name.strip if name
+    user = user.strip if user
     
-    halt_json 400, {:error=>'unknown_user', :error_description=>'Ukendt bruger'} unless Lacuna.find_user(user)
-    halt_json 409, {:error=>'alias_exists', :error_description=>'Alias existerer allerede'} if Lacuna.find_alias(name)
+    #halt_json 400, {:error=>'unknown_user', :error_description=>'Ukendt bruger'} unless Lacuna.find_user(user)
+    #halt_json 409, {:error=>'alias_exists', :error_description=>'Alias existerer allerede'} if Lacuna.find_alias(name)
 
-    unless Lacuna.create_alias(name, user)
-      halt_json 500, {:error=>'creation_failed', :error_description=>'Alias ikke skabt. Check log'}
-    end
+    Lacuna.create_alias(name, user)
 
     content_type :json
     data = mail_alias_json(Lacuna.find_alias(name))
@@ -100,6 +106,7 @@ class Lacuna::App::Mails < Lacuna::App::Base
   get '/aliases/:id' do
     a = Lacuna.find_alias(params[:id])
     not_found unless a
+    require_scope 'all'
     content_type :json
     mail_alias_json(a).to_json
   end
@@ -107,6 +114,7 @@ class Lacuna::App::Mails < Lacuna::App::Base
   delete '/aliases/:id' do
     a = Lacuna.find_alias(params[:id])
     halt 204 unless a
+    require_scope 'all'
     content_type :json
     a.remove
     mail_alias_json(a).to_json

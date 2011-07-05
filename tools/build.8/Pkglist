@@ -12,10 +12,12 @@ pkg "nginx"
 	pkg "courierpasswd"
 	pkg "courier-authlib-userdb"
 	port 'mail/roundcube', :defines=>%w{WITHOUT_MYSQL WITH_SQLITE WITH_SSL}
+	pkg 'php5-fileinfo'
+	pkg 'sqlite2'
+	pkg 'spawn-fcgi'
 #end
 pkg 'bash'
 pkg 'isc-dhcp41-server'
 pkg 'rsync'
 #pkg 'fcgiwrap'
-#pkg 'spawn-fcgi'
 pkg 'sudo'

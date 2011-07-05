@@ -1,0 +1,52 @@
+en:
+  lacuna:
+    errors:
+      bad_request:
+        grant_type:
+          missing: 'Missing grant type'
+          unsupported: 'Unsupported grant type'
+        client_id:
+          missing: 'Missing client id'
+          invalid: 'client id is invalid'
+        refresh_token:
+          missing: 'Missing refresh token'
+          expired: 'Expired refresh token'
+        login:
+          invalid: 'Invalid user name or password'
+        unauthorized_user: 'Unauthorized user'
+        alias:
+          missing: 'Alias is missing'
+          invalid:
+            empty: 'Alias is empty'
+            bad_encoding: 'Invalid encoding %{name} for alias'
+            bad_character: 'Invalid character in alias at position %{pos}'
+        username:
+          missing: 'User name is missing'
+          unchangeable: 'User name can not be modified'
+          unknown: 'Unknown user'
+          invalid:
+            empty: 'User name is empty'
+            to_long: 'User name is to long'
+            bad_encoding: 'Invalid encoding %{name} for user name'
+            bad_character: 'Invalid character in user name at position %{pos}'
+        password:
+          missing: 'Password is missing'
+          invalid:
+            empty: 'Password is empty'
+        gecos:
+          invalid:
+            bad_character: 'Invalid character in user description at position %{pos}'
+        restore:
+          invalid: 'Restore parameter is invalid'
+      conflict:
+        username:
+          exists: 'User name already exists'
+        alias:
+          exists: 'Alias already exists'
+      forbidden:
+        remove:
+          system_user: 'System users can not be deleted'
+          admin_user: 'Adminstrator user can not be deleted'
+      default:
+        username:
+          missing: 'User name is missing'

@@ -37,7 +37,7 @@ module Lacuna
     
     def remove
       Programs.userdb(name, 'del') &&
-        (mail.nil? || Programs.rm_rf(mail, :secure=>true))
+        (mail.nil? || FileUtils.rm_rf(mail, :secure=>true))
     end
   end
 end

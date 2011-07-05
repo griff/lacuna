@@ -2,6 +2,7 @@ Lacuna::Configuration.defaults do |c|
   c.paths do |p|
     p.prefix = ''
     p.bin = p.prefix/:bin
+    p.sbin = p.prefix/:sbin
     p.etc = p.prefix/:etc
     p.usr = p.prefix/:usr
     p.usr_sbin = p.usr/:sbin

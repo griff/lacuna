@@ -1,3 +1,4 @@
+require 'i18n'
 
 module Lacuna
   def self.root
@@ -5,21 +6,23 @@ module Lacuna
   end
   
   def self.initialize!
+    I18n.load_path << "#{root}/i18n/en.yml"
+    #I18n.load_path << "#{root}/i18n/da.yml"
     Configuration.clear
     load("#{root}/config/defaults.rb")
     load("#{root}/config/config.rb") if File.exists?("#{root}/config/config.rb")
   end
   
-  def self.paths
-    configuration.paths
+  def self.paths(*args)
+    configuration.paths(*args)
   end
   
-  def self.programs
-    configuration.programs
+  def self.programs(*args)
+    configuration.programs(*args)
   end
 
-  def self.encodings
-    configuration.encodings
+  def self.encodings(*args)
+    configuration.encodings(*args)
   end
   
   def self.configuration

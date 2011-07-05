@@ -17,7 +17,7 @@ module Rack
           env['oauth2.token.user'] = grant['username']
           env['oauth2.token.type'] = 'bearer'
           env['oauth2.token.value'] = grant['access_token']
-          env['oauth2.token.scope'] = grant['scope']
+          env['oauth2.token.scopes'] = grant['scopes']
           env['oauth2.token.expires_in'] = grant['expires_in']
         end
 

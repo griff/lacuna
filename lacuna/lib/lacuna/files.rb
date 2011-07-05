@@ -21,6 +21,7 @@ module Lacuna
       cfg, etc, local_etc = Lacuna.paths(:cfg, :etc, :local_etc)
       Programs.mount cfg do
         files.uniq.each do |f|
+          f = f.to_s
           src, dst, shared = if f.start_with?(etc)
             [etc, cfg, f[4..-1]]
           elsif f.start_with?(local_etc)
@@ -28,7 +29,7 @@ module Lacuna
           end
           next unless src && File.exist?(f)
 
-          Programs.copy_path(src, dst, shared)
+          FileUtils.copy_path(src, dst, shared)
         end
       end
     end

@@ -68,7 +68,7 @@ class CommandPipe
   end
   
   def completed?
-    @status.nil?
+    !@status.nil?
   end
   
   def success?
@@ -86,7 +86,7 @@ class CommandPipe
   end
   
   def input=(input)
-    raise "Command [#{show_command}] already completed" unless completed?
+    raise "Command [#{show_command}] already completed" if completed?
     @input = input
   end
   

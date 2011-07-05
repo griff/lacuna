@@ -30,9 +30,9 @@ module Sinatra
       require_scopes(*scope.split(' '))
     end
     
-    def required_scopes(*scopes)
+    def require_scopes(*scopes)
       validate_token(scopes.join(' '))
-      unless scopes.all?{|s| env['oauth2.scopes'].include?(s)}
+      unless scopes.all?{|s| env['oauth2.token.scopes'].include?(s)}
         forbidden(:scope=>scopes.join(' '), :error=>:insufficient_scope)
       end
     end

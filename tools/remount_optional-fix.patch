@@ -1,0 +1,24 @@
+--- /etc/rc.initdiskless	2011-02-18 02:52:09.000000000 +0100
++++ etc/rc.initdiskless	2011-06-21 18:15:07.000000000 +0200
+@@ -166,14 +166,17 @@
+ chkerr() {
+     lastitem () ( n=$(($# - 1)) ; shift $n ; echo $1 )
+     mountpoint="$(lastitem $2)"
+-    [ -r $mountpoint/remount_optional ] && ( echo "$2 failed: ignoring due to remount_optional" ; return )
+     case $1 in
+     0)
+ 	;;
+     *)
+-	echo "$2 failed: dropping into /bin/sh"
+-	/bin/sh
+-	# RESUME
++	if [ -r $mountpoint/remount_optional ] ; then
++	     echo "$2 failed: ignoring due to remount_optional"
++	else
++	     echo "$2 failed: dropping into /bin/sh"
++	     /bin/sh
++	     # RESUME
++	fi
+ 	;;
+     esac
+ }

@@ -71,6 +71,10 @@ module Lacuna
     def scope
       'all'
     end
+    
+    def scopes
+      ['all'].to_set
+    end
 
     def [](name)
       send(name)

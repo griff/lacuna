@@ -1,6 +1,8 @@
 require 'sinatra/base'
+require 'json'
 require 'lacuna/app-base'
 require 'lacuna/users'
+require 'lacuna/trash'
 
 class Lacuna::App::Users < Lacuna::App::Base
 
@@ -34,22 +36,24 @@ class Lacuna::App::Users < Lacuna::App::Base
   end
 
   get '/active' do
+    require_scope 'all'
     content_type :json
     Lacuna.real_users.map{|u| user_json(u)}.to_json
   end
 
   post '/active' do
+    require_scope 'all'
     name, gecos, pw = params[:name], params[:gecos], params[:password]
-    halt_json 400, {:error=>'missing_username', :error_description=>'Brugernavn mangler'} unless name
-    name = name.strip
-    halt_json 400, {:error=>'invalid_username.to_short', :error_description=>'Brugernavn er for kort'} unless name.size > 0
-    halt_json 400, {:error=>'invalid_username.to_long', :error_description=>'Brugernavn er for langt'} unless name.size <= 16
-    halt_json 409, {:error=>'username_exists', :error_description=>'Brugernavn existerer allerede'} if Lacuna.find_user(name)
-    halt_json 400, {:error=>'missing_password', :error_description=>'Kodeord mangler'} unless pw && pw.size > 0
+    #halt_json 400, {:error=>'missing_username', :error_description=>'Brugernavn mangler'} unless name
+    #name = name.strip
+    #halt_json 400, {:error=>'invalid_username.to_short', :error_description=>'Brugernavn er for kort'} unless name.size > 0
+    #halt_json 400, {:error=>'invalid_username.to_long', :error_description=>'Brugernavn er for langt'} unless name.size <= 16
+    #halt_json 409, {:error=>'username_exists', :error_description=>'Brugernavn existerer allerede'} if Lacuna.find_user(name)
+    #halt_json 400, {:error=>'missing_password', :error_description=>'Kodeord mangler'} unless pw && pw.size > 0
     gecos = gecos.strip if gecos
-    puts "Restore #{params[:restore]} " + (/^.*\/(.*)$/ =~ params[:restore]).inspect
+    #puts "Restore #{params[:restore]} " + (/^.*\/(.*)$/ =~ params[:restore]).inspect
     restore = (params[:restore] =~ /\/([^\/]+)$/) ? $1 : nil
-    puts "Restore parsed #{restore}"
+    #puts "Restore parsed #{restore}"
     u = Lacuna.create_user(name, :password=>pw, :gecos=>gecos, :create_home=>true, :restore=>restore)
 
     content_type :json
@@ -60,6 +64,7 @@ class Lacuna::App::Users < Lacuna::App::Base
   get '/active/:id' do
     user = Lacuna.find_user(params[:id])
     not_found unless user && user.real?
+    require_scope 'all'
     content_type :json
     user_json(user).to_json
   end
@@ -67,10 +72,10 @@ class Lacuna::App::Users < Lacuna::App::Base
   put '/active/:id' do
     user = Lacuna.find_user(params[:id])
     not_found unless user && user.real?
+    require_scope 'all'
 
     name, pw = params[:name], params[:password]
-    halt_json 400, {:error=>'invalid_password', :error_description=>'Kodeord ugyldigt'} if pw && pw.size == 0
-    halt_json 400, {:error=>'username_unchangeable', :error_description=>'Brugernavn kan ikke modificeres'} if name && name != user.name
+    raise Lacuna::BadRequestError, 'username.unchangeable' if name && name != user.name
 
     user.password = pw if pw
     user.gecos = params[:gecos].strip if params[:gecos]
@@ -83,26 +88,30 @@ class Lacuna::App::Users < Lacuna::App::Base
   delete '/active/:id' do
     user = Lacuna.find_user(params[:id])
     halt 204 unless user && user.real?
+    require_scope 'all'
     content_type :json
     user.remove
     user_json(user).to_json
   end
 
   get '/trash' do
+    require_scope 'all'
     content_type :json
     Lacuna.user_trash.map{|u| trash_json(u)}.to_json
   end
 
   get '/trash/:id' do
-    trash = Lacuna.user_trash.find{|t| t.folder == params[:id]}
+    trash = Lacuna.find_user_trash(params[:id])
     not_found unless trash
+    require_scope 'all'
     content_type :json
     trash_json(trash).to_json
   end
   
   delete '/trash/:id' do
-    trash = Lacuna.user_trash.find{|t| t.folder == params[:id]}
+    trash = Lacuna.find_user_trash(params[:id])
     halt 204 unless trash
+    require_scope 'all'
     content_type :json
     trash.remove
     trash_json(trash).to_json

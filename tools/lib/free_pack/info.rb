@@ -1,5 +1,10 @@
 module FreePack
+  def self.installed?(name)
+    FileUtils.sh('pkg_info', '-e', name) {|ok, status| ok}
+  end
+
   class Info
+    
     def self.split(name)
       if name =~ /(.+)-(\d+\..+)$/
         [$1, $2]
@@ -31,7 +36,7 @@ module FreePack
     end
     
     def installed?
-      FileUtils.sh('pkg_info', fullname) {|ok, status| ok}
+      FreePack.installed?(fullname)
     end
   end
 end

@@ -148,12 +148,6 @@ device		cbb		# cardbus (yenta) bridge
 device		pccard		# PC Card (16-bit) bus
 device		cardbus		# CardBus (32-bit) bus
 
-device		atkbdc		# AT keyboard controller
-device		atkbd		# AT keyboard
-device		vga		# VGA video card driver
-device		splash		# Splash screen and screen saver support
-# syscons is the default console driver, resembling an SCO console
-device		sc
 
 # Serial (COM) ports
 #device		sio		# 8250, 16[45]50 based serial ports

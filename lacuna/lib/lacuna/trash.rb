@@ -19,16 +19,15 @@ module Lacuna
   end
 
   class UserTrash
-    include FileUtils
-
-    attr_reader :prefix, :folder, :user, :group, :time, :autodelete
+    attr_reader :prefix, :folder, :user, :group, :time, :autodelete, :aliases
 
     def initialize(prefix)
       @prefix = prefix
       deleted_file = prefix + '.deleted'
       deleted_file = prefix/'.deleted' unless File.exist?(deleted_file)
       @folder = File.basename(prefix)
-      info = IO.read(deleted_file).split(':')
+      @aliases = IO.read(deleted_file).split("\n").map(&:strip)
+      info = @aliases.shift.split(':')
       @user, @group, @time, @autodelete = User.new(info[0..9]), info[10], info[11], info[12]
       @time, @autodelete = Time.at(@time.to_i), @autodelete.to_i
       @time = Date.new(@time.year, @time.month, @time.day)
@@ -49,9 +48,9 @@ module Lacuna
     end
     
     def remove
-      Programs.rm_rr(prefix, :secure=>true)
-      Programs.rm_rf(prefix+'.deleted', :secure=>true)
-      Programs.rm_rf(prefix+'.tgz', :secure=>true)
+      FileUtils.rm_rf(prefix, :secure=>true)
+      FileUtils.rm_rf(prefix+'.deleted', :secure=>true)
+      FileUtils.rm_rf(prefix+'.tgz', :secure=>true)
     end
   end
 end

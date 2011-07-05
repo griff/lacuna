@@ -1,0 +1,72 @@
+#!/bin/sh
+#
+# FreeBSD rc.d script for fastcgi+php
+
+# PROVIDE: php_cgi
+# REQUIRE: LOGIN cleanvar
+# KEYWORD: shutdown
+
+#
+# Add the following lines to /etc/rc.conf to enable lacuna:
+# fcgiphp_enable (bool):        Set to "NO" by default.
+#                               Set it to "YES" to enable php-cgi
+# lacuna_home (str):            Set to "/usr/lacuna" by default.
+#                               Installation directory of lacuna
+
+. /etc/rc.subr
+
+set_rcvar php_cgi_enable NO "Set it to \"YES\" to enable fcgiphp"
+set_rcvar php_cgi_children 3 "Port that php-cgi should start on"
+set_rcvar php_cgi_user www "User to run php-cgi as"
+set_rcvar php_cgi_group www "Group to run php-cgi as"
+set_rcvar php_cgi_max_requests 500 "Max requests"
+
+
+name="php_cgi"
+rcvar=`set_rcvar`
+
+load_rc_config $name
+
+
+socketfile=/var/run/php-cgi/php-cgi.socket
+pidfile=/var/run/php-cgi/php-cgi.pid
+env_keep="SHELL PATH USER"
+
+command=/usr/local/bin/spawn-fcgi
+procname=/usr/local/bin/php-cgi
+command_args="-d /var/run/php-cgi -u $php_cgi_user -g $php_cgi_group -C $php_cgi_children -M 0777 -s $socketfile -P $pidfile -- $procname"
+
+start_precmd()
+{
+	mkdir -p /var/run/php-cgi
+	chown $php_cgi_user /var/run/php-cgi
+	chgrp $php_cgi_group /var/run/php-cgi
+	mkdir -p /var/tmp/php-cgi
+	chown $php_cgi_user /var/tmp/php-cgi
+	chgrp $php_cgi_group /var/tmp/php-cgi
+	PHP_FCGI_MAX_REQUESTS="$php_cgi_max_requests"
+	FCGI_WEB_SERVER_ADDRS=$php_cgi_address
+	TMPDIR=/var/tmp/php-cgi
+	export PHP_FCGI_MAX_REQUESTS
+	export FCGI_WEB_SERVER_ADDRS
+	export TMPDIR
+	allowed_env="$env_keep PHP_FCGI_MAX_REQUESTS FCGI_WEB_SERVER_ADDRS TMPDIR"
+# copy the allowed environment variables
+	E=""
+	for i in $allowed_env; do
+		eval "x=\$$i"
+		E="$E $i=$x"
+	done
+	command="env - $E $command"
+}
+
+cleanup() (
+  rm $pidfile
+  rm $socketfile
+)
+
+start_precmd=start_precmd
+stop_postcmd=cleanup
+
+run_rc_command "$1"
+

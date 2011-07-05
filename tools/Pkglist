@@ -1,0 +1,5 @@
+#source "ftp://ftp.freebsd.org/pub/FreeBSD/ports/i386/packages-8-stable"
+source "ftp://ftp.freebsd.org/pub/FreeBSD/ports/i386/packages-8.2-release"
+
+pkg 'cdrtools'
+port_pkg 'ruby19'
