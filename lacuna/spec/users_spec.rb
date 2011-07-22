@@ -85,8 +85,8 @@ describe Lacuna, 'users' do
   end
   
   it "allows creation of utf-8 gecos" do
-    u = Lacuna.create_user('bro', :gecos=>'søren')
-    u.gecos.should eql("søren")
+    u = Lacuna.create_user('bro', :gecos=>'søren lisberg')
+    u.gecos.should eql("søren lisberg")
   end
 
   (0..127).map(&:chr).find_all{|c| !Lacuna.invalid_gecos_characters.include?(c) }.each do |c|

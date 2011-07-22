@@ -1,11 +1,14 @@
+require 'pathname'
 require 'free_pack/info'
 require 'free_pack/fileutils'
 
 include FileUtils
 
-@@pkg_dir = ARGV[0] || '/usr/obj/lacuna/Pkg'
+@@pkg_dir = Pathname.new(ARGV[0] || ENV['LACUNA_TOOLS'] || '/usr/obj/lacuna/Pkg').realpath
 @@target_arch = ARGV[1] || `uname -p`.strip
+@@patch_dir = Pathname.new(ARGV[2] || ENV['LACUNA_TOOLS']).realpath
 mkdir_p @@pkg_dir
+
 @@indent = 0
 
 LOADED={}
@@ -78,6 +81,23 @@ def port(name, options={})
       largs = largs.map{|key, value| "#{key}=#{value}"}
     end
     largs.map!{|d| d =~ /=/ ? d : "-D#{d}" }
+    
+    patches = options[:patches]
+    patches = [options[:patch]] unless patches || options[:patch].nil?
+    patches = [] unless patches
+    
+    patches.each do |patch|
+      patch = File.join(@@patch_dir, patch)
+      patch = patch + '.patch' unless File.exist?(patch)
+      base = File.basename(patch)
+      puts "#{'-'*@@indent}Applying patch #{base} to port #{name}"
+      if File.exist?(".done.#{base}")
+        sh 'find . -name \*.orig -and -not -path ./work/\* | sed "s/\.orig//" | xargs -I % mv %.orig %'
+        FileUtils.rm(".done.#{base}")
+      end
+      sh 'patch', '-NEt','-p0', '-i', patch
+      FileUtils.cp(patch, ".done.#{base}")
+    end
     
     puts "#{'-'*@@indent}Building port #{name} with args #{largs.join(' ')}"
     

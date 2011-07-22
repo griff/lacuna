@@ -68,7 +68,7 @@ module Lacuna
   end
   
   def self.invalid_gecos_characters 
-    ((0..' '.ord).map(&:chr).join('') + "!:@\x7f").chars
+    ((0..31).map(&:chr).join('') + "!:@\x7f").chars
   end
   
   def self.validate_username(name)
@@ -89,6 +89,7 @@ module Lacuna
       unless gecos.ascii_only?
         gecos = Lacuna::Encoding.encode_word(gecos)
       end
+      puts "Gecos is '#{gecos}'"
       raise BadRequestError.new('gecos.invalid.bad_character', :pos=>$`.size) if gecos =~ Regexp.new(invalid_gecos_characters.map{|e| Regexp.escape(e) }.join('|'))
       options[:gecos] = gecos
     end

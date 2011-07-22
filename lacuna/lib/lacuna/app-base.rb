@@ -41,7 +41,7 @@ module Lacuna
         Lacuna::Files.save
       end
       
-      error [BadRequestError, ForbiddenError, ConflictError, LacunaTaggedError]  do
+      error [BadRequestError, ForbiddenError, ConflictError, LacunaTaggedError] do
         e = env['sinatra.error']
         halt_json e.http_status, :error=>e.tag, :error_description=>e.message
       end

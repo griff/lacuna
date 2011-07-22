@@ -2,6 +2,10 @@
 
 FIRST_USER_ACCOUNT_UID = 1000
 LOCAL_DELIVERY = maildir_home
+MAIN_TLS_ENABLE = yes
+MAIN_TLS_CERTKEY = /etc/ssl/full.pem
+AUTH_SERVER_ALLOW_NOTLS_PASSWORDS = yes
+MAIN_DOMAIN = vagtelhave.dk
 
 ######################################################################
 #                  Runtime configuration file for Exim               #
@@ -67,7 +71,7 @@ accept_8bitmime = true
 # +local_domains, +relay_to_domains, and +relay_from_hosts, respectively. They
 # are all colon-separated lists:
 
-domainlist local_domains = @:vagtelhave.dk
+domainlist local_domains = @:MAIN_DOMAIN
 domainlist relay_to_domains =
 hostlist   relay_from_hosts = localhost
 
@@ -207,7 +211,7 @@ daemon_smtp_ports = 25 : 587
 # unqualified addresses from remote sources. If this option is not set, the
 # primary_hostname value is used for qualification.
 
-qualify_domain = vagtelhave.dk
+qualify_domain = MAIN_DOMAIN
 
 
 # If you want unqualified recipient addresses to be qualified with a different

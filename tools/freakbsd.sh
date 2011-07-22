@@ -320,7 +320,7 @@ setup_freakbsd ( ) (
 
 	# pick up config files from the special partition
 	echo "mount -o ro /dev/ufs/cfg" > conf/default/etc/remount
-	#touch conf/default/etc/remount_optional
+	touch conf/default/etc/remount_optional
 
 	# Put /tmp on the /var ramdisk (could be symlink already)
 	rmdir tmp || true

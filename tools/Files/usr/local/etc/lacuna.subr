@@ -5,6 +5,7 @@ if [ -d "/var/lacuna" ] ; then
 else
   set_rcvar lacuna_home /usr/lacuna "Installation directory of lacuna"
 fi
+set_rcvar lacuna_environment production "Rack environment to run lacuna under"
 
 # read settings, set default values
 load_rc_config 'lacuna'

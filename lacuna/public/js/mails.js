@@ -37,7 +37,7 @@ $(function() {
               
             },
             error: function(xhr) {
-              if(xhr.statusCode !== 401 && xhr.contentType == 'application/json') {
+              if(xhr.status !== 401 && xhr.getResponseHeader( "content-type" ) === 'application/json') {
                 var err = $.parseJSON(xhr.responseText),
                     message = err.error;
                 if(err.error_description) {

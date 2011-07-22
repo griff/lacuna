@@ -60,7 +60,9 @@ module Rack
           :bearer == scheme
         end
 
-        alias :token :params
+        def token
+          params.split(',').first
+        end
       end
 
     end

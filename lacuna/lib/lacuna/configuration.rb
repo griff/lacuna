@@ -7,7 +7,8 @@ module Lacuna
   
   def self.initialize!
     I18n.load_path << "#{root}/i18n/en.yml"
-    #I18n.load_path << "#{root}/i18n/da.yml"
+    I18n.load_path << "#{root}/i18n/da.yml"
+    I18n.locale = 'da'
     Configuration.clear
     load("#{root}/config/defaults.rb")
     load("#{root}/config/config.rb") if File.exists?("#{root}/config/config.rb")

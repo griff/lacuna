@@ -23,6 +23,8 @@ export LACUNA_PACKAGE_DIR
 NANO_TOOLS=/usr/src/tools/tools/nanobsd
 FREAK_TOOLS=/usr/src/tools/tools/nanobsd
 
+mtree -cip Files -k uname,gname,mode > $LACUNA_TOOLS/Files.mtree
+
 if [ -f "${NANO_TOOLS}/nanobsd.sh" ] ; then
   sh ${NANO_TOOLS}/nanobsd.sh -c $LACUNA_TOOLS/nano.conf $@
 else

@@ -1,5 +1,6 @@
 module Lacuna
   module Network
+    VIRTUAL = %w{bridge ppp pppoe pptp l2tp sl gif gre faith lo ng _vlan _wlan pflog plip pfsync enc tun carp lagg vip ipfw}
     class << self
       def interfaces(flush=false)
         @network_interfaces = nil if flush
@@ -8,22 +9,7 @@ module Lacuna
       
       def ll(mode=:active, vfaces=nil)
         unless vfaces
-          vfaces = ['bridge',
-            'ppp',
-            'sl',
-            'gif',
-            'gre',
-            'faith',
-            'lo',
-            'ng',
-            'vlan',
-            'pflog',
-            'pfsync',
-            'enc',
-            'tun',
-            'carp',
-            'lagg',
-            'plip']
+          vfaces = %w{bridge ppp sl gif gre faith lo ng vlan pflog pfsync enc tun carp lagg plip}
         end
       end
       
@@ -33,9 +19,9 @@ module Lacuna
     end
     
     class Interface
-      def self.is_macaddr(addr)
+      def self.macaddr?(addr)
         addr = addr.to_s.strip.split(':')
-        return addr.length == 6 && addr.all? {|e| e=~ /^[0-9a-fA-F]{2}$/}
+        addr.length == 6 && addr.all? {|e| e=~ /^[0-9a-fA-F]{2}$/}
       end
       
       attr_reader :device, :id

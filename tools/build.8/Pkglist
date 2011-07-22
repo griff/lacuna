@@ -3,7 +3,8 @@ source "ftp://ftp.freebsd.org/pub/FreeBSD/ports/i386/packages-8.2-release"
 
 port "ruby19", :define=>"RUBY_DEFAULT_VER=1.9"
 port "ruby-iconv", :define=>"RUBY_DEFAULT_VER=1.9"
-pkg "nginx"
+port "nginx", :define=>'WITH_HTTP_SSL_MODULE'
+port 'avahi-app', :patch=>'avahi-daemon'
 #group :mail do
 	#port "exim", :define=>'WITHOUT_EMBEDDED_PERL'
 	pkg "exim"

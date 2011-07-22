@@ -36,9 +36,9 @@ socketfile="${varprefix}.socket"
 #)
 #stop_postcmd=cleanup
 
-command=$lacuna_home/bin/thin
-command_interpreter=ruby19
+command=$lacuna_home/gembin/thin
+command_interpreter=ruby
 procname=thin
-command_args="-S $socketfile -R $lacuna_home/config.ru -l /var/log/lacuna.log -P $pidfile -d start"
+command_args="-S $socketfile -R $lacuna_home/config.ru -e $lacuna_environment -l /var/log/lacuna.log -P $pidfile -d start"
 
 run_rc_command "$1"

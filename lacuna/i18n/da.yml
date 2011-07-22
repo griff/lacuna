@@ -1,0 +1,53 @@
+#encoding: utf-8
+da:
+  lacuna:
+    errors:
+      bad_request:
+        grant_type:
+          missing: 'Grant type mangler'
+          unsupported: 'Ugyldig grant type'
+        client_id:
+          missing: 'Client id mangler'
+          invalid: 'Client id er ugyldig'
+        refresh_token:
+          missing: 'Refresh token mangler'
+          expired: 'Refresh token er udløbet'
+        login:
+          invalid: 'Ugyldigt brugernavn eller kodeord'
+        unauthorized_user: 'Unautoriseret bruger'
+        alias:
+          missing: 'Alias mangler'
+          invalid:
+            empty: 'Alias er tomt'
+            bad_encoding: 'Ugyldig enkoding %{name} for alias'
+            bad_character: 'Ugyldigt tegn i alias ved position %{pos}'
+        username:
+          missing: 'Brugernavn mangler'
+          unchangeable: 'Brugernavn kan ikke modificeres'
+          unknown: 'Ukendt bruger'
+          invalid:
+            empty: 'Brugernavn er tomt'
+            to_long: 'Brugernavn er for langt'
+            bad_encoding: 'Ugyldig enkoding %{name} for brugernavn'
+            bad_character: 'Ugyldigt tegn i brugernavn ved position %{pos}'
+        password:
+          missing: 'Kodeord mangler'
+          invalid:
+            empty: 'Kodeord er tomt'
+        gecos:
+          invalid:
+            bad_character: 'Ugyldigt tegn i bruger beskrivelse ved position %{pos}'
+        restore:
+          invalid: 'Restore parameter er invalid'
+      conflict:
+        username:
+          exists: 'Bruger med samme navn eksisterer allerede'
+        alias:
+          exists: 'Alias eksisterer allerede'
+      forbidden:
+        remove:
+          system_user: 'System brugere kan ikke slettes'
+          admin_user: 'Adminstrator bruger kan ikke slettes'
+      default:
+        username:
+          missing: 'Brugernavn mangler'

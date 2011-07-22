@@ -1,10 +1,8 @@
 #!/usr/bin/env ruby19
 require 'pathname'
-ENV['BUNDLE_GEMFILE'] ||= File.expand_path("../Gemfile",
+ENV['BUNDLE_GEMFILE'] ||= File.expand_path("../../Gemfile",
   Pathname.new(__FILE__).realpath)
-
-dirname = File.dirname(__FILE__)
-$LOAD_PATH.push(File.join(dirname, 'lib'))
+$LOAD_PATH.push(File.expand_path('../../lib', __FILE__))
 
 require 'rubygems'
 require 'bundler'
@@ -31,7 +29,7 @@ end
 puts "#{users.size} #{aliases.size}"
 aliases.each{|u,kode| users << [u[0..15], kode] }
 
-api = JSON.parse(RestClient.get('http://10.42.1.92/api', :accept=>'application/json'))
+api = JSON.parse(RestClient.get('http://localhost/api', :accept=>'application/json'))
 
 token_json = JSON.parse(RestClient.post(api['auth'], :username=>'admin', :password=>'lacuna', :client_id=>1, :grant_type=>'password'))
 token = token_json['access_token']
@@ -39,7 +37,7 @@ puts "Using token: #{token}"
 
 users.each do |name,kode|
   puts "Creating user #{name}"
-  RestClient.post(api['users'], {:name=>name, :password=>kode}, :Authorization=>"Bearer #{token}")
+  RestClient.post(api['users'], {:name=>name, :password=>kode, :restore=>'/api/trash/'+name}, :Authorization=>"Bearer #{token}")
 end
 
 aliases.each do |name,kode|
