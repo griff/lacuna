@@ -89,7 +89,6 @@ module Lacuna
       unless gecos.ascii_only?
         gecos = Lacuna::Encoding.encode_word(gecos)
       end
-      puts "Gecos is '#{gecos}'"
       raise BadRequestError.new('gecos.invalid.bad_character', :pos=>$`.size) if gecos =~ Regexp.new(invalid_gecos_characters.map{|e| Regexp.escape(e) }.join('|'))
       options[:gecos] = gecos
     end
