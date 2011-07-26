@@ -86,26 +86,34 @@ def port(name, options={})
     patches = [options[:patch]] unless patches || options[:patch].nil?
     patches = [] unless patches
     
+    rebuild = false
     patches.each do |patch|
       patch = File.join(@@patch_dir, patch)
       patch = patch + '.patch' unless File.exist?(patch)
       base = File.basename(patch)
+      doneName = ".done.#{base}"
       puts "#{'-'*@@indent}Applying patch #{base} to port #{name}"
-      if File.exist?(".done.#{base}")
+      unless File.exist?(doneName) && IO.read(doneName).eql?(IO.read(patch))
+        puts "#{'-'*(@@indent+1)}Patch #{base} forced a rebuild"
+        FileUtils.rm(doneName) if File.exist?(doneName)
         sh 'find . -name \*.orig -and -not -path ./work/\* | sed "s/\.orig//" | xargs -I % mv %.orig %'
-        FileUtils.rm(".done.#{base}")
+        sh 'patch', '-NEt','-p0', '-i', patch
+        FileUtils.cp(patch, doneName)
+        rebuild = true
       end
-      sh 'patch', '-NEt','-p0', '-i', patch
-      FileUtils.cp(patch, ".done.#{base}")
     end
-    
+
     puts "#{'-'*@@indent}Building port #{name} with args #{largs.join(' ')}"
+    if rebuild || !File.exists?(".done.build") || !IO.read(".done.build").eql?(largs.join(' '))
+      puts "#{'-'*(@@indent+1)}Forced build because of args" unless rebuild
+      rebuild = true
+    end
     
     dependencies = `make run-depends-list #{largs.join(' ')}`.strip.split("\n")
     fullname = `make package-name #{largs.join(' ')}`.strip
     raise "Invalid package name #{name} #{fullname}" unless fullname =~ Regexp.new("-([^-]*)$")
     version = $1
-    unless File.exist?("#{@@pkg_dir}/#{fullname}.tbz")
+    unless File.exist?("#{@@pkg_dir}/#{fullname}.tbz") && !rebuild
       dependencies.each do |e|
         port_pkg(e, :install=>true)
       end
@@ -114,6 +122,7 @@ def port(name, options={})
       
       sh "make", "clean", *args
       sh "make", "package", *args
+      File.open(".done.build", "w") {|f| f.write(largs.join(' '))}
     else
       dependencies.each do |e|
         port_pkg(e)
