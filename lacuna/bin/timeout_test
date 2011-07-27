@@ -1,0 +1,80 @@
+#!/usr/bin/env ruby
+require 'socket'
+HOST = ARGV.shift
+PORT = (ARGV.shift || 7).to_i # defaults to echo port
+TIMEOUT = 15
+high = (ARGV.shift || 60).to_i
+
+class TestConn
+  attr_reader :c, :last, :wait
+  def initialize(host, port, wait)
+    @c = TCPSocket::new( host, port )
+    @wait = wait
+    @last = Time.new.to_i
+    c.send("S\n", 0)
+    recv = c.recv(2)
+    raise "Echo Error #{recv.inspect}" unless recv == "S\n"
+  end
+  
+  def send
+    c.send("O\n", 0)
+  end
+  
+  def wakeup
+    last + wait*60
+  end
+  
+  def waited
+    Time.new.to_i - last
+  end
+  
+  def update(wait)
+    @last = Time.new.to_i
+    @wait = wait
+  end
+end
+
+class Range
+  def to_exclude_end
+    exclude_end? ? self : Range.new(first, last.succ, true)
+  end
+  
+  def size
+    last - first + (exclude_end? ? 0 : 1)
+  end
+end
+
+def check_bounds(range)
+  return range if range.size <= 1
+  count = Math.log2(range.size).round
+  puts "Checking bounds #{range} with #{count} connections"
+  connections = count.times.map do |idx|
+    wait = range.last - (1 << idx) + (range.exclude_end? ? 0 : 1)
+    TestConn.new(HOST, PORT, wait)
+  end
+  puts connections.map(&:wait).inspect
+  
+  while connections.size > 0
+    connection = connections.min{|a,b| a.wakeup <=> b.wakeup}
+    time = Time.new.to_i
+    if connection.wakeup > time
+      puts "Sleeping #{(connection.wakeup-time)/60} minutes"
+      sleep(connection.wakeup-time) 
+    end
+
+    connection.send
+    result = IO.select([connection.c], nil, nil, TIMEOUT)
+    if result
+      range = Range.new(connection.wait, range.last, range.exclude_end?)
+      puts "Raising lower bound to #{range}"
+    else
+      range = Range.new(range.first, connection.wait, true)
+      puts "Lowering upper bound to #{range}"
+      connections.clear
+    end
+    connections.delete(connection)
+  end
+  check_bounds(range)
+end
+
+check_bounds(0..high)
