@@ -25,7 +25,7 @@ $(function() {
       buttons:{
         'OK': function() {
           $.ajax({
-            url:api.mail_aliases,
+            url:$(window).data('api').mail_aliases,
             type:'POST',
             dataType:'json',
             data:{name:alias_name.val(), user:alias_user.val()},
@@ -89,7 +89,7 @@ $(window).bind('mailsreload', function(e) {
   $('tbody.empty', queue).hide();
   $('tbody.loading', queue).show();
 
-  $.getJSON(api.mails, function(data) {
+  $.getJSON($(window).data('api').mails, function(data) {
     var oldbody = $('tbody.data', queue),
         newbody = $('<tbody></tbody>').addClass('data');
         
@@ -119,7 +119,7 @@ $(window).bind('mailaliasessreload', function(e) {
   $('tbody.empty', table).hide();
   $('tbody.loading', table).show();
 
-  $.getJSON(api.mail_aliases, function(data) {
+  $.getJSON($(window).data('api').mail_aliases, function(data) {
     var oldbody = $('tbody.data', table),
         newbody = $('<tbody></tbody>').addClass('data');
         

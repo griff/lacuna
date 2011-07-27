@@ -44,7 +44,7 @@ $(function() {
             }
             //console.log('Old data', old, old && old.restore);
             $.ajax({
-              url:api.users,
+              url:$(window).data('api').users,
               type:'POST',
               dataType:'json',
               data:data,
@@ -197,7 +197,7 @@ $(window).bind('usersreload', function(e) {
   $('tbody.empty', users).hide();
   $('tbody.loading', users).show();
 
-  $.getJSON(api.users, function(data) {
+  $.getJSON($(window).data('api').users, function(data) {
     var oldbody = $('tbody.data', users),
         newbody = $('<tbody></tbody>').addClass('data');
         
@@ -221,7 +221,7 @@ $(window).bind('trashreload', function(e) {
   $('tbody.empty', users).hide();
   $('tbody.loading', users).show();
 
-  $.getJSON(api.trash, function(data) {
+  $.getJSON($(window).data('api').trash, function(data) {
     var oldbody = $('tbody.data', users),
         newbody = $('<tbody></tbody>').addClass('data');
         
