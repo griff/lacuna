@@ -1,0 +1,16 @@
+<tbody class="data">
+  <% for(var i=0; i<this.length; i++) { 
+    var item = this[i];
+  %>
+  <tr>
+    <td><%= item.name %></td>
+    <td><%= item.folder %></td>
+    <td class="center"><%= item.time %></td>
+    <td class="center"><%= item.days_to_autodelete %></td>
+    <td>
+      <span class="delete" data-href="<%= item.url %>">Slet</span>
+      <span class="restore" data-href="<%= item.url %>">Gendan</span>
+    </td>
+  </tr>
+<% } %>
+</tbody>

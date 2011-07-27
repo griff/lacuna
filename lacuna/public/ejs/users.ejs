@@ -1,0 +1,18 @@
+<tbody class="data">
+  <% for(var i=0; i<this.length; i++) { 
+    var item = this[i];
+  %>
+  <tr>
+    <td><span class="edit" data-href="<%= item.url%>"><%= item.name %></span></td>
+    <td><%= item.gecos %></td>
+    <td class="center"><%= item.usage %> MB</td>
+    <td>
+      <% if(item.name !== 'admin') { %>
+        <span class="delete" data-href="<%= item.url %>">Slet</span>
+      <% } else { %>
+        &nbsp;
+      <% } %>
+    </td>
+  </tr>
+<% } %>
+</tbody>

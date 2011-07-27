@@ -193,20 +193,14 @@ $(window).bind('userdeleted', function(e) {
 });
 
 $(window).bind('usersreload', function(e) {
-  var users = $('table#users');
+  var users = $('table#users'),
+      ejs = new EJS({url: 'ejs/users.ejs'});
   $('tbody.empty', users).hide();
   $('tbody.loading', users).show();
 
   $.getJSON($(window).data('api').users, function(data) {
     var oldbody = $('tbody.data', users),
-        newbody = $('<tbody></tbody>').addClass('data');
-        
-    $.each( data, function( index, item ) {
-      var html = '<tr><td><span class="edit" data-href="'+item.url+'">' + item.name + '</span></td>' + 
-        '<td>' + item.gecos + '</td><td class="center">' + item.usage + ' MB</td><td>' +
-        (item.name !== 'admin' ? '<span class="delete" data-href="'+item.url+'">Slet</span>' : '&nbsp;') + '</td></tr>';
-      $(html).appendTo(newbody);
-    });
+        newbody = $(ejs.render(data));
     $('tbody.loading', users).hide();
     if(data.length === 0) {
       $('tbody.empty', users).show();
@@ -217,21 +211,14 @@ $(window).bind('usersreload', function(e) {
 });
 
 $(window).bind('trashreload', function(e) {
-  var users = $('table#trash');
+  var users = $('table#trash'),
+      ejs = new EJS({url: 'ejs/trash.ejs'});
   $('tbody.empty', users).hide();
   $('tbody.loading', users).show();
 
   $.getJSON($(window).data('api').trash, function(data) {
     var oldbody = $('tbody.data', users),
-        newbody = $('<tbody></tbody>').addClass('data');
-        
-    $.each( data, function( index, item ) {
-      var html = '<tr><td>' + item.name + '</td>' + 
-        '<td>' + item.folder + '</td><td class="center">' + item.time + '</td><td class="center">' +
-        item.days_to_autodelete + '</td><td>' +
-        '<span class="delete" data-href="'+item.url+'">Slet</span> <span class="restore" data-href="'+item.url+'">Gendan</span></td></tr>';
-      $(html).appendTo(newbody);
-    });
+        newbody = $(ejs.render(data));
     $('tbody.loading', users).hide();
     if(data.length === 0) {
       $('tbody.empty', users).show();

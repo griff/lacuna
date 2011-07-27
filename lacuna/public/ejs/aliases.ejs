@@ -1,0 +1,11 @@
+<tbody class="data">
+  <% for(var i=0; i<this.length; i++) { 
+    var item = this[i];
+  %>
+  <tr>
+    <td><%= item.name %></td>
+    <td><%= item.user %></td>
+    <td><span class="delete" data-href="<%= item.url %>">Slet</span></td>
+  </tr>
+<% } %>
+</tbody>

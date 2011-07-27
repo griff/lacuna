@@ -85,22 +85,14 @@ $(function() {
 });
 
 $(window).bind('mailsreload', function(e) {
-  var queue = $('table#mailqueue');
+  var queue = $('table#mailqueue'),
+        ejs = new EJS({url: 'ejs/mails.ejs'});
   $('tbody.empty', queue).hide();
   $('tbody.loading', queue).show();
 
   $.getJSON($(window).data('api').mails, function(data) {
     var oldbody = $('tbody.data', queue),
-        newbody = $('<tbody></tbody>').addClass('data');
-        
-    $.each( data, function( index, item ) {
-      var html = '<tr><td rowspan="2" class="center">'+item.queue_time+'</td>'+
-      '<td class="center">'+item.size+'</td><td>'+item.id+'</td><td>'+item.from+
-      '</td><td>'+item.to+'</td><td class="center">'+(item.frozen===true ? 'ja' : 'nej')+'</td><td rowspan="2"><span class="delete" data-href="' + 
-      item.url+'">Slet</span> <span class="delete" data-href="'+(item.frozen ? item.thaw_url + '">Thaw' : item.freeze_url + '">Freeze')+'</span></td></tr>' +
-      '<tr><td colspan="5">'+item.log.join('<br>')+'</td></tr>';
-      $(html).appendTo(newbody);
-    });
+        newbody = $(ejs.render(data));
     $('tbody.loading', queue).hide();
     if(data.length === 0) {
       $('tbody.empty', queue).show();
@@ -115,19 +107,14 @@ $(window).bind('userdeleted', function(e) {
 });
 
 $(window).bind('mailaliasessreload', function(e) {
-  var table = $('table#mail_aliases');
+  var table = $('table#mail_aliases'),
+      ejs = new EJS({url: 'ejs/aliases.ejs'});
   $('tbody.empty', table).hide();
   $('tbody.loading', table).show();
 
   $.getJSON($(window).data('api').mail_aliases, function(data) {
     var oldbody = $('tbody.data', table),
-        newbody = $('<tbody></tbody>').addClass('data');
-        
-    $.each( data, function( index, item ) {
-      var html = '<tr><td>'+item.name+'</td><td>'+item.user+
-        '</td><td><span class="delete" data-href="' + item.url+'">Slet</span></td></tr>';
-      $(html).appendTo(newbody);
-    });
+        newbody = $(ejs.render(data));
     $('tbody.loading', table).hide();
     if(data.length === 0) {
       $('tbody.empty', table).show();

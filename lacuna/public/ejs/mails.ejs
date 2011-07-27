@@ -1,0 +1,25 @@
+<tbody class="data">
+  <% for(var i=0; i<this.length; i++) { 
+    var item = this[i];
+  %>
+  <tr>
+    <td rowspan="2" class="center"><%= item.queue_time %></td>
+    <td class="center"><%= item.size %></td>
+    <td><%= item.id %></td>
+    <td><%= item.from %></td>
+    <td><%= item.to %></td>
+    <td class="center"><%= (item.frozen===true ? 'ja' : 'nej') %></td>
+    <td rowspan="2">
+      <span class="delete" data-href="<%= item.url %>">Slet</span>
+      <% if(item.frozen) { %>
+        <span class="delete" data-href="<%= item.thaw_url %>">Thaw</span>
+      <% } else { %>
+        <span class="delete" data-href="<%= item.freeze_url %>">Freeze</span>
+      <% } %>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="5"><%= item.log.join('<br>') %></td>
+  </tr>
+<% } %>
+</tbody>
