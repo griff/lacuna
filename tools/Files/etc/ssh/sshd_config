@@ -103,6 +103,7 @@ ChallengeResponseAuthentication no
 #PermitUserEnvironment no
 #Compression delayed
 #ClientAliveInterval 0
+ClientAliveInterval 120
 #ClientAliveCountMax 3
 #UseDNS yes
 #PidFile /var/run/sshd.pid
