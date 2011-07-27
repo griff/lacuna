@@ -17,8 +17,9 @@ Lacuna::Configuration.defaults do |c|
     p.var_log = p.var / :log
     p.var_db = p.var / :db
     p.aliases = p.etc/:aliases
+    p.fstab = p.etc/:fstab
+
     p.socket = p.var_run/'lacuna.socket'
-    
     p.tokens = p.var_run/'lacuna.tokens'
     p.authdaemond_socket = p.var_run/:authdaemond/:socket
 
