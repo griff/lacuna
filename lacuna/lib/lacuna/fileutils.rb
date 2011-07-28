@@ -164,8 +164,8 @@ module FileUtils
     end
   end
   
-  OPT_TABLE['sh']  = %w(noop verbose)
-  OPT_TABLE['capture_sh']  = %w(noop verbose)
+  OPT_TABLE['sh']  = [:noop, :verbose]
+  OPT_TABLE['capture_sh']  = [:noop, :verbose]
 
   # Run the system command +cmd+. If multiple arguments are given the command
   # is not run with the shell (same semantics as Kernel::exec and
