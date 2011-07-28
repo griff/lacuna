@@ -1,0 +1,32 @@
+#	   user: root
+#	machine: lacuna-dev.maven-group.org
+#	   tree: /root/sandbox/lacuna/templates
+#	   
+# .
+/set type=dir uname=root gname=wheel mode=0755
+.              
+# ./var
+    var            
+# ./var/output
+        output         
+# ./var/output/autodiscover
+            autodiscover   
+            # ./var/output/autodiscover
+            ..
+# ./var/output/well-known
+            well-known     
+# ./var/output/well-known/autoconfig
+                autoconfig     
+# ./var/output/well-known/autoconfig/mail
+                    mail           
+                    # ./var/output/well-known/autoconfig/mail
+                    ..
+                # ./var/output/well-known/autoconfig
+                ..
+            # ./var/output/well-known
+            ..
+        # ./var/output
+        ..
+    # ./var
+    ..
+..
