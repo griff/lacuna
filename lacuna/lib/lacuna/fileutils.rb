@@ -377,7 +377,7 @@ module Lacuna
         begin
           yield
         ensure
-          program(:umount, args[0])
+          program(:umount, args.last)
         end
       end
     end
