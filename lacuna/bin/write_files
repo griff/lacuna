@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+require File.expand_path('../../config/application', __FILE__)
+require 'lacuna'
+require 'find'
+
+extend Lacuna::Programs
+
+templates = File.join(Lacuna.root, 'templates')
+Find.find(templates) do |path|
+  puts path[templates.size..-1]
+end
