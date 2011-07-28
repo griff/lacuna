@@ -12,6 +12,16 @@ task 'clean:users' do
   end
 end
 
+task 'template:mtree:create' do
+  dir = File.expand_path('../templates', __FILE__)
+  sh "mtree -dcip #{dir} -k uname,gname,mode | sed 's/date:.*//' > #{dir}.mtree"
+end
+
+task 'template:mtree:apply' do
+  dir = File.expand_path('../templates', __FILE__)
+  sh "mtree -Up #{dir} -f #{dir}.mtree"
+end
+
 RSpec::Core::RakeTask.new(:spec)
 
 task :default => :spec

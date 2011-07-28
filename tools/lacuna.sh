@@ -25,7 +25,7 @@ FREAK_TOOLS=/usr/src/tools/tools/nanobsd
 
 mtree -cip Files -k uname,gname,mode | sed "s/date\:.*//" > $LACUNA_TOOLS/Files.mtree
 cd $LACUNA_SRC
-rake template:mtree
+rake template:mtree:create
 cd -
 
 # shell output
