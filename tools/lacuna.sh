@@ -25,6 +25,32 @@ FREAK_TOOLS=/usr/src/tools/tools/nanobsd
 
 mtree -cip Files -k uname,gname,mode | sed "s/date\:.*//" > $LACUNA_TOOLS/Files.mtree
 
+# shell output
+warn() { echo "$@" >&2; }
+die() { warn "$@"; exit 1; }
+
+git_is_clean_working_tree() {
+        if ! git diff --no-ext-diff --ignore-submodules --quiet --exit-code; then
+                return 1
+        elif ! git diff-index --cached --quiet --ignore-submodules HEAD --; then
+                return 2
+        else
+                return 0
+        fi
+}
+
+require_clean_working_tree() {
+        git_is_clean_working_tree
+        local result=$?
+        if [ $result -eq 1 ]; then
+                die "fatal: Working tree contains unstaged changes. Aborting."
+        fi
+        if [ $result -eq 2 ]; then
+                die "fatal: Index contains uncommited changes. Aborting."
+        fi
+}
+require_clean_working_tree
+
 if [ -f "${NANO_TOOLS}/nanobsd.sh" ] ; then
   sh ${NANO_TOOLS}/nanobsd.sh -c $LACUNA_TOOLS/nano.conf $@
 else
