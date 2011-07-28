@@ -240,6 +240,36 @@ module FileUtils
   end
   module_function :capture_sh
   
+  def retryable_lock(file, options={}, &block)
+    opts = {:tries=>5, :sleep=>60}.merge(options)
+    retries, sleeptime = opts[:tries], opts[:sleep].to_i
+    begin
+      lock(file, File::LOCK_EX|File::LOCK_NB, &block)
+    rescue NonBlockedLockError
+      puts "Retrying #{retries} after sleeping #{sleeptime}"
+      sleep sleeptime if sleeptime > 0
+      retry if (retries -= 1) > 0
+      yield false
+    end
+  end
+  
+  class NonBlockedLockError < RuntimeError
+  end
+  
+  def lock(file, flags=File::LOCK_EX)
+    File.open(file, File::RDWR|File::CREAT, 0600) do |f|
+      ret = f.flock(flags)
+      raise NonBlockedLockError if ret.is_a?(FalseClass) && (flags&File::LOCK_NB)==File::LOCK_NB
+      f.truncate  0
+      f.puts "LOCKED by #{Process.pid}"
+      begin
+        yield f
+      ensure
+        f.puts "UNLOCKED by #{Process.pid}"
+      end
+    end
+  end
+  
   def pipe(*cmd, &block)
     CommandPipe.new(*cmd, &block)
   end
