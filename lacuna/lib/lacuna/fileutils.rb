@@ -312,7 +312,7 @@ end
 
 module Lacuna
   module Programs
-    include FileUtils::Verbose
+    include FileUtils
     
     def program_path(sym)
       path = Lacuna.programs[sym].to_s
@@ -357,5 +357,10 @@ module Lacuna
     end
     
     extend Programs
+    
+    module Verbose
+      include Lacuna::Programs
+      include FileUtils::Verbose
+    end
   end
 end
