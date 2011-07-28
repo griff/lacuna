@@ -18,8 +18,13 @@ Lacuna::Configuration.defaults do |c|
     p.var_db = p.var / :db
     p.aliases = p.etc/:aliases
     p.fstab = p.etc/:fstab
+    p.dumpdates = p.etc/:dumpdates
     
     p.led = '/dev/led'
+    
+    p.backup_device = '/dev/ufs/backup'
+    p.backup_led = p.led/:error
+    p.backup_lock = p.var_run/'backup.lock'
 
     p.socket = p.var_run/'lacuna.socket'
     p.tokens = p.var_run/'lacuna.tokens'
@@ -56,6 +61,8 @@ Lacuna::Configuration.defaults do |c|
     p.tar = pa.usr_bin/:tar
     p.du = pa.usr_bin/:du
     p.hostname = pa.bin/:hostname
+    p.dump = pa.sbin/:dump
+    p.gzip = pa.usr_bin/:gzip
   end
   c.product do |p|
     p.name = 'Lacuna'

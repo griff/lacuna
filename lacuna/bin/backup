@@ -1,0 +1,70 @@
+#!/usr/bin/env ruby
+
+require File.expand_path('../../config/application',  __FILE__)
+require 'lacuna/mounts'
+require 'lacuna/files'
+
+def usage
+  puts "Usage: backup [daily|weekly]"
+  exit 1
+end
+
+usage if ARGV.size == 0
+period = ARGV.shift.to_sym
+case period
+when :weekly
+  t = Time.new.strftime('%Y%m%d')
+  name = "dump-week-#{t}"
+  level = 0
+when :daily
+  t = Time.new.strftime('%a').downcase
+  name = "dump-day-#{t}"
+  level = 1
+else
+  usage
+end
+
+dev, cfg, var, lockfile = Lacuna.paths(:backup_device, :cfg, :var, :backup_lock)
+dump = Lacuna.programs.dump
+gzip = Lacuna.programs.gzip
+cfg_mp = Lacuna.find_mounts(:file=>cfg).last
+var_mp = Lacuna.find_mounts(:file=>var).last
+
+if File.chardev?(dev)
+  extend Lacuna::Programs
+
+  retryable_lock(lockfile, :tries=>4, :sleep=>15*60) do |locked|
+    unless locked
+      puts "WARNING: Could not aquire lock. Skipping #{period} backup..."
+      exit 1
+    end
+    Lacuna.led(:backup_led, 1) do
+      mount('-t', 'ufs', dev, '/mnt') do
+        Lacuna::Files.modified << Lacuna.paths.dumpdates
+        begin
+          cd '/mnt' do
+            name += Time.new.strftime("-%H%M") if File.exists?("var-#{name}.gz") || File.exists?("cfg-#{name}.gz") || File.exists?("#{name}.tar")
+            sh "#{dump} -#{level}Lauf - #{var_mp.spec} | #{gzip} - > var-#{name}.gz"
+            if cfg_mp && File.chardev?(cfg_mp.spec)
+              sh "#{dump} -#{level}auf - #{cfg_mp.spec} | #{gzip} - > cfg-#{name}.gz"
+              tar 'cvf', "#{name}.tar", "var-#{name}.gz", "cfg-#{name}.gz"
+              rm %W{var-#{name}.gz cfg-#{name}.gz}
+            end
+      
+            # Remove last weeks daily dumps
+            if period == :weekly
+              rm Dir["var-dump-day-*"]
+              rm Dir["cfg-dump-day-*"]
+              rm Dir["dump-day-*"]
+            end
+          end
+        ensure
+          Lacuna::Files.save
+        end
+      end
+    end
+  end
+else
+  puts "WARNING: Backup device #{dev} is not available. Skipping #{period} backup..."
+  exit 1
+end
