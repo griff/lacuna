@@ -21,7 +21,7 @@ module Lacuna
     def save
       cfg, etc, local_etc = Lacuna.paths(:cfg, :etc, :local_etc)
       mp = Lacuna.find_mounts(:file=>cfg).last
-      if mp && File.blockdev?(mp.spec)
+      if mp && File.chardev?(mp.spec)
         Programs.mount cfg do
           files.uniq.each do |f|
             f = f.to_s
