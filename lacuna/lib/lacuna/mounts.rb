@@ -41,7 +41,7 @@ module Lacuna
     end
     
     def ==(other)
-      eql?(other)
+      other.is_a?(MountPoint) && spec == other.spec && file == other.file
     end
     
     def eql?(other)
