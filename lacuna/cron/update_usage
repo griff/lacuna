@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby19
+#!/usr/bin/env ruby
 
 require File.expand_path('../../config/boot',  __FILE__)
 require 'lacuna/users'
