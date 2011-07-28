@@ -84,4 +84,20 @@ module Lacuna
   def self.domain
     hostname[host.size+1..-1]
   end
+  
+  def self.led(device, pattern)
+    device = Lacuna.paths(device)
+    if File.chardev?(device)
+      File.open(device, 'w') {|f| f.puts pattern}
+      if block_given?
+        begin
+          yield
+        ensure
+          File.open(device, 'w') {|f| f.puts "0"}
+        end
+      end
+    elsif block_given?
+      yield
+    end
+  end
 end

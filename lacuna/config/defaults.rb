@@ -18,6 +18,8 @@ Lacuna::Configuration.defaults do |c|
     p.var_db = p.var / :db
     p.aliases = p.etc/:aliases
     p.fstab = p.etc/:fstab
+    
+    p.led = '/dev/led'
 
     p.socket = p.var_run/'lacuna.socket'
     p.tokens = p.var_run/'lacuna.tokens'
