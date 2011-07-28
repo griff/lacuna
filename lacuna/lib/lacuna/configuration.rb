@@ -81,11 +81,19 @@ module Lacuna
       end
 
       def eql?(other)
-        group.eql?(other.group) && key.eql?(other.key)
+        if other.respond_to?(:group) && other.respond_to?(:key)
+          group.eql?(other.group) && key.eql?(other.key)
+        else
+          to_str.eql?(other.to_str)
+        end
       end
 
       def ==(other)
-        group == other.group && key == other.key
+        if other.respond_to?(:group) && other.respond_to?(:key)
+          group == other.group && key == other.key
+        else
+          other.respond_to?(:to_str) && to_str == other.to_str
+        end
       end
     end
     
