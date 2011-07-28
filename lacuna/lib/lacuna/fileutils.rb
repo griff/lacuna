@@ -280,18 +280,32 @@ module FileUtils
   module_function :copy_path  
   
   module Verbose
-    def sh(*cmd, &block)
-      options = (Hash === cmd.last) ? cmd.pop : {}
-      options[:verbose] = true
-      cmd.push(options)
-      super(*cmd, &block)
+    def sh(*args, &block)
+      super(*fu_update_option(args, :verbose => true), &block)
     end
 
-    def capture_sh(*cmd, &block)
-      options = (Hash === cmd.last) ? cmd.pop : {}
-      options[:verbose] = true
-      cmd.push(options)
-      super(*cmd, &block)
+    def capture_sh(*args, &block)
+      super(*fu_update_option(args, :verbose => true), &block)
+    end
+  end
+
+  module NoWrite
+    def sh(*args, &block)
+      super(*fu_update_option(args, :noop => true), &block)
+    end
+
+    def capture_sh(*args, &block)
+      super(*fu_update_option(args, :noop => true), &block)
+    end
+  end
+
+  module DryRun
+    def sh(*args, &block)
+      super(*fu_update_option(args, :noop => true, :verbose => true), &block)
+    end
+
+    def capture_sh(*args, &block)
+      super(*fu_update_option(args, :noop => true, :verbose => true), &block)
     end
   end
 end
