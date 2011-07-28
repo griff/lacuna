@@ -82,7 +82,12 @@ module Lacuna
   end
   
   def self.domain
-    hostname[host.size+1..-1]
+    ret = hostname[host.size+1..-1]
+    if ret.downcase == 'local'
+      hostname
+    else
+      ret
+    end
   end
   
   def self.led(device, pattern)
