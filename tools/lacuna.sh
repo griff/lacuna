@@ -24,6 +24,9 @@ NANO_TOOLS=/usr/src/tools/tools/nanobsd
 FREAK_TOOLS=/usr/src/tools/tools/nanobsd
 
 mtree -cip Files -k uname,gname,mode | sed "s/date\:.*//" > $LACUNA_TOOLS/Files.mtree
+cd $LACUNA_SRC
+rake template:mtree
+cd -
 
 # shell output
 warn() { echo "$@" >&2; }
