@@ -278,6 +278,22 @@ module FileUtils
     cp(File.join(src, shared), File.join(dst, shared), :preserve=>true)
   end
   module_function :copy_path  
+  
+  module Verbose
+    def sh(*cmd, &block)
+      options = (Hash === cmd.last) ? cmd.pop : {}
+      options[:verbose] = true
+      cmd.push(options)
+      super(*cmd, &block)
+    end
+
+    def capture_sh(*cmd, &block)
+      options = (Hash === cmd.last) ? cmd.pop : {}
+      options[:verbose] = true
+      cmd.push(options)
+      super(*cmd, &block)
+    end
+  end
 end
 
 module Lacuna
