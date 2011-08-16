@@ -2,10 +2,23 @@
 require File.expand_path('../../config/application', __FILE__)
 require 'lacuna'
 require 'find'
+require 'erb'
 
 extend Lacuna::Programs
 
 templates = File.join(Lacuna.root, 'templates')
 Find.find(templates) do |path|
-  puts path[templates.size..-1]
+  oo = path[templates.size..-1]
+  next if oo.size == 0
+  oo = File.join(File.dirname(oo), File.basename(oo, '.erb'))
+  if File.directory?(path) && !File.exists?(oo)
+    Dir.mkdir(oo)
+    FileUtils.copy_metadata(path, oo)
+  elsif !File.directory?(path)
+    erb = ERB.new(File.read(path))
+    erb.filename = path
+    contents = erb.result
+    File.open(oo, "w+") {|f| f.write contents }
+    FileUtils.copy_metadata(path, oo)
+  end
 end
